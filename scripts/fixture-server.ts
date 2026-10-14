@@ -10,7 +10,7 @@ const app = createApp({ token, extensionId, rateLimit: 100, provider: {
       const timer = setTimeout(resolve, 1000);
       signal.addEventListener('abort', () => { clearTimeout(timer); reject(new Error('Aborted')); }, { once: true });
     });
-    try { return { segments: fixtureResult(request).segments }; }
+    try { return { levels: fixtureResult(request).levels }; }
     catch { throw serviceError(422, 'fixture', 'Offline test: select one of the complete passages on the TLDR fixture page.', false); }
   },
 } });

@@ -20,24 +20,29 @@ export async function runBrowserChecks(output: HTMLElement): Promise<void> {
     const paragraph = root.querySelector<HTMLElement>('#summary')!;
     const footerY = input.getBoundingClientRect().y;
     record('Loading controls are disabled in the fixed frame', input.disabled && root.querySelector<HTMLButtonElement>('#copy-summary')!.disabled && card.getBoundingClientRect().height === Math.min(420, innerHeight - 32));
+    record('Opening focuses the dialog, not Close', root.activeElement === card && getComputedStyle(card).outlineStyle === 'none');
     view.state({ status: 'ready', result });
     for (let i = 0; i < 100 && !paragraph.querySelector('.word'); i++) await pause(30);
     record('Bundled font loaded', document.fonts.check('13px "TLDR Inter"'));
-    record('Initial reveal uses the approved 500 ms duration', paragraph.querySelector('.word')?.getAnimations()[0]?.effect?.getTiming().duration === 500);
+    record('Initial reveal uses the approved 500 ms duration', paragraph.querySelector('.word-ink')?.getAnimations()[0]?.effect?.getTiming().duration === 500);
     await pause(2900);
     const firstWord = paragraph.querySelector('.word');
     const choose = (value: number) => { input.value = String(value); input.dispatchEvent(new Event('input', { bubbles: true })); };
-    choose(4); await pause(110);
+    choose(4);
+    record('Shared words animate into their new layout positions', [...paragraph.querySelectorAll('.word:not(.removing)')].some(word => word.getAnimations().some(a => a.effect?.getTiming().duration === 240)));
+    const arrivals = [...paragraph.querySelectorAll('.word:not(.removing) .word-ink')].flatMap(word => word.getAnimations()).filter(a => a.effect?.getTiming().duration === 180);
+    record('New details reveal in reading order', arrivals.length > 1 && arrivals.every((a, i) => i === 0 || Number(a.effect?.getTiming().delay) >= Number(arrivals[i - 1]!.effect?.getTiming().delay)));
+    await pause(110);
     record('Changed digits soften during the 720 ms roll', [...root.querySelectorAll<HTMLElement>('.counter-reel')].some(reel => parseFloat(getComputedStyle(reel).filter.replace('blur(', '')) > .5 && reel.getAnimations().some(a => a.effect?.getTiming().duration === 720)));
     choose(0);
-    record('Shortening animates words out', [...paragraph.querySelectorAll('.removing .word')].some(word => word.getAnimations().length > 0));
+    record('Shortening animates words out', [...paragraph.querySelectorAll('.removing .word-ink')].some(word => word.getAnimations().length > 0));
     for (const value of [4, 0, 3, 1, 4, 2]) { choose(value); await pause(35); }
     await pause(300);
-    record('Rapid reversals resolve to the latest summary', paragraph.querySelectorAll('.segment').length === 3 && !paragraph.querySelector('.removing') && paragraph.textContent?.trim() === summaryText(result.segments, 2));
+    record('Rapid reversals resolve to the latest summary', !paragraph.querySelector('.removing') && paragraph.textContent?.trim() === summaryText(result.levels, 2));
     record('Shared words retain their DOM nodes', firstWord === paragraph.querySelector('.word'));
     record('Footer remains fixed while text changes', Math.abs(input.getBoundingClientRect().y - footerY) < .5);
     await pause(1100);
-    record('Counter settles crisp and in its default color', [...root.querySelectorAll<HTMLElement>('.counter-reel')].every(reel => getComputedStyle(reel).filter === 'blur(0px)' && !reel.getAnimations().length) && root.querySelector('.counter-digits')?.textContent?.trim() === '56');
+    record('Counter settles crisp and in its default color', [...root.querySelectorAll<HTMLElement>('.counter-reel')].every(reel => getComputedStyle(reel).filter === 'blur(0px)' && !reel.getAnimations().length) && root.querySelector('.counter-digits')?.textContent?.trim() === String(result.wordCounts[2]));
     input.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 7, isPrimary: true, button: 0 })); choose(1.35);
     record('Pointer travel stays continuous', Number(input.value) === 1.35);
     window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 7, isPrimary: true })); await pause(200);
@@ -45,16 +50,16 @@ export async function runBrowserChecks(output: HTMLElement): Promise<void> {
     choose(4); await pause(300);
     const scroll = root.querySelector<HTMLElement>('#summary-scroll')!;
     scroll.scrollTop = scroll.scrollHeight; await pause(70);
-    const last = paragraph.querySelector<HTMLElement>('.segment:last-child .word:last-of-type')!;
+    const last = paragraph.querySelector<HTMLElement>('.word:not(.removing):last-of-type')!;
     const bottom = parseFloat(root.querySelector<HTMLElement>('#summary-blur-bottom')!.style.getPropertyValue('--edge-height'));
     record('Last line clears the footer fade', last.getBoundingClientRect().bottom <= scroll.getBoundingClientRect().bottom - bottom - 7);
     record('Scrolling reveals the independent 64 px header blur', !root.querySelector<HTMLElement>('#summary-blur-top')!.hidden && root.querySelector<HTMLElement>('#summary-blur-top')!.style.getPropertyValue('--edge-height') === '64px');
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     record('Escape dismisses and removes the dialog', !view.host.isConnected);
     view = make(() => true); view.state({ status: 'ready', result }); await pause(100);
-    record('Reduced motion renders complete text with no word or counter animation', view.root.querySelector('#summary')!.textContent!.trim() === summaryText(result.segments, 2) && view.root.querySelector('.glass')!.getAnimations({ subtree: true }).length === 0);
+    record('Reduced motion renders complete text with no word or counter animation', view.root.querySelector('#summary')!.textContent!.trim() === summaryText(result.levels, 2) && view.root.querySelector('.glass')!.getAnimations({ subtree: true }).length === 0);
     view.root.querySelector<HTMLInputElement>('#detail')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
-    record('Keyboard End selects the longest preset', view.root.querySelector('#word-count-readable')!.textContent === '111 words');
+    record('Keyboard End selects the longest preset', view.root.querySelector('#word-count-readable')!.textContent === `${result.wordCounts[4]} words`);
   } catch (error) { record(`Browser check exception: ${error instanceof Error ? error.message : String(error)}`, false); }
   finally { view.destroy(); }
 }

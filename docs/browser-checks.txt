@@ -1,6 +1,9 @@
 PASS · Loading controls are disabled in the fixed frame
+PASS · Opening focuses the dialog, not Close
 PASS · Bundled font loaded
 PASS · Initial reveal uses the approved 500 ms duration
+PASS · Shared words animate into their new layout positions
+PASS · New details reveal in reading order
 PASS · Changed digits soften during the 720 ms roll
 PASS · Shortening animates words out
 PASS · Rapid reversals resolve to the latest summary

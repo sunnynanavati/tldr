@@ -1,6 +1,6 @@
 # TLDR
 
-A Chrome extension that summarizes selected text in the approved floating glass dialog. The slider switches locally between five cumulative levels, preserving shared text and the original animations.
+A Chrome extension that summarizes selected text in the approved floating glass dialog. The slider switches locally between five progressively expanded levels, preserving shared text and the original animations.
 
 ## This workspace
 
@@ -45,9 +45,11 @@ The original studio remains at `prototypes/tldr.html`. Its saved preset and `pro
 
 The extension uses `activeTab` only after a context-menu invocation. A manual top-layer popover avoids page stacking/clipping, and Shadow DOM isolates the approved CSS. The font is decoded from bundled bytes so the page does not need to permit font requests. The panel defaults to 320 × 420px and clamps to the viewport.
 
-`POST /v1/summaries` accepts `{ requestId, text }` and returns `{ requestId, segments, wordCounts }`. Each segment contains `runs: [{ text, emphasis }]`; level N joins the first N segments. Counts are computed in code. Model output is rendered as text, never HTML.
+`POST /v1/summaries` accepts `{ requestId, text }` and returns `{ requestId, levels, wordCounts }`. Each level is a complete summary with `runs: [{ text, emphasis }]`. Counts are computed in code. Model output is rendered as text, never HTML.
 
-Passages with at least 40 Unicode words receive five cumulative levels; shorter passages receive one. Selections under four words get an instruction to select a complete sentence. Input is limited to 40,000 characters, two active requests, and ten attempts per minute. The backend aborts after 20 seconds and the UI times out after 25 seconds. A failed attempt offers Retry; dragging the slider makes no API calls.
+Passages with at least 40 Unicode words receive five progressively expanded levels; shorter passages receive one. Selections under four words get an instruction to select a complete sentence. Input is limited to 40,000 characters, two active requests, and ten attempts per minute. The backend aborts after 20 seconds and the UI times out after 25 seconds. A failed attempt offers Retry; dragging the slider makes no API calls.
+
+For longer passages, the provider returns a composition plan with a shared lead sentence, a short insertion inside it, and ordered supporting parts. The backend compiles this into complete levels without rewriting retained words. Short selections use a single compact summary. Emphasis is limited to short phrases and a 20% word budget; whole-sentence emphasis is removed. The renderer matches retained words, animates their new positions, and reveals inserted details in reading order. Shortening reverses the reveal; rapid changes cancel superseded motion.
 
 The default model is `gpt-6-luna` with reasoning disabled, strict structured output, and `store: false`. Set `OPENAI_MODEL` to change the model only if it supports the same API features. No automatic model substitution occurs.
 
@@ -64,3 +66,5 @@ Chrome 120+ on ordinary HTTP/HTTPS pages. Restricted browser pages, the Chrome W
 ## Validation
 
 See `docs/validation.md`, `docs/browser-checks.txt`, and `docs/screenshots/` for the verification record. Live model quality remains a separate check from deterministic UI and contract tests.
+
+After updating from the original append-only build, reload TLDR at `chrome://extensions` and refresh the source page. The backend and extension must both use the new `levels` response contract.

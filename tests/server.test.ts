@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createApp, type ServerConfig } from '../src/server/app';
-import { fixtureSource, fixtureSegments, shortSource, shortSegments } from '../src/dev/fixtures';
+import { fixtureSource, fixtureLevels, shortSource, shortLevels } from '../src/dev/fixtures';
 import { serviceError } from '../src/server/errors';
 import type { SummaryProvider } from '../src/server/provider';
 
@@ -8,7 +8,7 @@ const extensionId = 'a'.repeat(32), token = 'test-only-local-token-'.repeat(3);
 const headers = { origin: `chrome-extension://${extensionId}`, authorization: `Bearer ${token}` };
 const payload = (text = fixtureSource) => ({ requestId: crypto.randomUUID(), text });
 const apps: ReturnType<typeof createApp>[] = [];
-function setup(provider: SummaryProvider | null = { summarize: async () => ({ segments: fixtureSegments }) }, extra: Partial<ServerConfig> = {}) {
+function setup(provider: SummaryProvider | null = { summarize: async () => ({ levels: fixtureLevels }) }, extra: Partial<ServerConfig> = {}) {
   const app = createApp({ token, extensionId, provider, ...extra }); apps.push(app); return app;
 }
 afterEach(async () => { await Promise.all(apps.splice(0).map(app => app.close())); });
@@ -23,11 +23,11 @@ describe('local backend', () => {
     const response = await app.inject({ method: 'OPTIONS', url: '/v1/summaries', headers: { origin: headers.origin } });
     expect(response.statusCode).toBe(204); expect(response.headers['access-control-allow-origin']).toBe(headers.origin);
   });
-  it('returns cumulative counts and reflects only the matching request ID', async () => {
+  it('returns complete-level counts and reflects only the matching request ID', async () => {
     const app = setup(), input = payload();
     const response = await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: input });
     expect(response.statusCode).toBe(200); expect(response.json().requestId).toBe(input.requestId);
-    expect(response.json().wordCounts).toEqual([20, 35, 56, 83, 111]); expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.json().wordCounts).toEqual([20, 35, 50, 80, 110]); expect(response.headers['cache-control']).toBe('no-store');
   });
   it('accepts Chrome’s omitted Origin only with the configured extension ID and bearer token', async () => {
     const app = setup();
@@ -38,12 +38,12 @@ describe('local backend', () => {
     expect((await app.inject({ url: '/health', headers: { 'x-tldr-extension-id': extensionId } })).statusCode).toBe(401);
   });
   it('serves a compact summary for short selections', async () => {
-    const app = setup({ summarize: async () => ({ segments: shortSegments }) });
+    const app = setup({ summarize: async () => ({ levels: shortLevels }) });
     const response = await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: payload(shortSource) });
-    expect(response.statusCode).toBe(200); expect(response.json().segments).toHaveLength(1);
+    expect(response.statusCode).toBe(200); expect(response.json().levels).toHaveLength(1);
   });
   it('explains when meaningful shortening is impossible', async () => {
-    const app = setup({ summarize: async () => ({ segments: [] }) });
+    const app = setup({ summarize: async () => ({ levels: [] }) });
     const response = await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: payload('The meeting starts at noon.') });
     expect(response.statusCode).toBe(422); expect(response.json().error.code).toBe('already_concise');
     expect(response.json().error.retryable).toBe(false);
@@ -56,7 +56,7 @@ describe('local backend', () => {
     expect((await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: payload('x'.repeat(40_001)) })).statusCode).toBe(400);
   });
   it('rejects invalid model output without exposing its contents', async () => {
-    const app = setup({ summarize: async () => ({ segments: [{ runs: [{ text: 'private provider content', emphasis: false }] }] }) });
+    const app = setup({ summarize: async () => ({ levels: [{ runs: [{ text: 'private provider content', emphasis: false }] }] }) });
     const response = await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: payload() });
     expect(response.statusCode).toBe(502); expect(response.body).not.toContain('private provider content');
   });

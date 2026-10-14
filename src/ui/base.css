@@ -27,3 +27,9 @@ input[type=range]:disabled{opacity:.35}
 @supports not (backdrop-filter:blur(1px)){.glass{background:linear-gradient(145deg,#1e1e1e,#111)}.summary-edge-layer{display:none}}
 @media(prefers-reduced-motion:reduce){.glass,button{transition:none!important;transform:none!important}.skeleton span::after{animation:none;display:none}}
 @media(forced-colors:active){.glass,.icon-button,.text-button{background:Canvas;color:CanvasText;border:1px solid CanvasText}.emphasis{color:CanvasText}.summary-edge-blur,.glass::before{display:none}.summary-scroll{mask-image:none!important}.skeleton span{background:GrayText}}
+
+/* Focus the dialog on opening without suggesting that Close was selected. */
+.glass:focus { outline: none; }
+/* Layout movement and ink reveal have separate transform layers. */
+#summary { position: relative; }
+.word-ink { display: inline-block; }

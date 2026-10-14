@@ -68,7 +68,7 @@ export function createApp(config: ServerConfig) {
     try {
       const model = await Promise.race([config.provider.summarize(input, controller.signal), deadline]);
       if (controller.signal.aborted) throw serviceError(499, 'cancelled', 'Summary cancelled.', false);
-      if (model.segments.length === 0) throw serviceError(422, 'already_concise', 'This selection is already concise. Try selecting a longer passage.', false);
+      if (model.levels.length === 0) throw serviceError(422, 'already_concise', 'This selection is already concise. Try selecting a longer passage.', false);
       try { return validateSummary(input, model); }
       catch { throw serviceError(502, 'invalid_summary', 'The summary needs another attempt. Try again.'); }
     } catch (error) {

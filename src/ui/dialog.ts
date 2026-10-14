@@ -48,7 +48,7 @@ export class TldrDialog {
     };
     for (const [name, value] of Object.entries(hostStyle)) this.host.style.setProperty(name, value, 'important');
     const sheet = new CSSStyleSheet(); sheet.replaceSync(glassCSS + '\n' + baseCSS); this.root.adoptedStyleSheets = [sheet];
-    this.card.className = 'glass'; this.card.setAttribute('role', 'dialog'); this.card.setAttribute('aria-labelledby', 'dialog-title');
+    this.card.className = 'glass'; this.card.tabIndex = -1; this.card.setAttribute('role', 'dialog'); this.card.setAttribute('aria-labelledby', 'dialog-title');
     this.card.innerHTML = template; // Static, bundled markup only. Model text is always rendered with textContent.
     applySettings(this.card); this.root.append(this.card);
     this.announcement.className = 'sr-only'; this.announcement.setAttribute('role', 'status'); this.announcement.setAttribute('aria-live', 'polite');
@@ -84,7 +84,7 @@ export class TldrDialog {
     this.preference.addEventListener('change', () => {
       this.slider.settle(); this.counter.settle(); if (this.result) this.render(false, true);
     }, options);
-    byId('close-dialog').focus({ preventScroll: true });
+    this.card.focus({ preventScroll: true });
     void loadFont().then(() => { if (this.alive) this.edges.schedule(); }).catch(() => { /* System fallback remains readable if font decoding fails. */ });
   }
   private reduced = () => this.motionOverride?.() ?? this.preference.matches;
@@ -123,10 +123,10 @@ export class TldrDialog {
       this.summary.removeAttribute('aria-hidden'); this.readable.textContent = '';
     } else {
       this.summary.setAttribute('aria-hidden', 'true');
-      this.result = state.result; this.level = state.result.segments.length === 1 ? 0 : 2;
+      this.result = state.result; this.level = state.result.levels.length === 1 ? 0 : 2;
       this.placeholder.hidden = true; this.root.getElementById('counter-digits')!.hidden = false;
-      this.copy.disabled = false; this.slider.set(this.level, state.result.segments.length === 5);
-      this.root.getElementById('length-hint')!.textContent = state.result.segments.length === 1
+      this.copy.disabled = false; this.slider.set(this.level, state.result.levels.length === 5);
+      this.root.getElementById('length-hint')!.textContent = state.result.levels.length === 1
         ? 'This short selection has one compact summary.'
         : 'Drag for shorter or more detailed text; release to snap to one of five lengths. Arrow keys move one preset at a time.';
       void loadFont().catch(() => undefined).then(() => {
@@ -142,15 +142,15 @@ export class TldrDialog {
   private render(initial = false, instant = false) {
     if (!this.result) return;
     clearTimeout(this.settledTimer); clearTimeout(this.copyTimer); this.copy.setAttribute('aria-label', 'Copy summary');
-    const total = this.reveal.render(this.result.segments, this.level, initial, instant);
-    const text = summaryText(this.result.segments, this.level), count = this.result.wordCounts[this.level]!;
+    const total = this.reveal.render(this.result.levels, this.level, initial, instant);
+    const text = summaryText(this.result.levels, this.level), count = this.result.wordCounts[this.level]!;
     this.readable.textContent = text; this.counter.set(count, initial || instant);
-    this.input.setAttribute('aria-valuetext', this.result.segments.length === 1 ? `${count} words, compact summary` : `${levelNames[this.level]}, ${count} words, level ${this.level + 1} of 5`);
+    this.input.setAttribute('aria-valuetext', this.result.levels.length === 1 ? `${count} words, compact summary` : `${levelNames[this.level]}, ${count} words, level ${this.level + 1} of 5`);
     this.settledTimer = window.setTimeout(() => { this.announcement.textContent = text; this.edges.schedule(); }, Math.max(total, 120));
   }
   private async copySummary() {
     if (!this.result) return;
-    const text = summaryText(this.result.segments, this.level);
+    const text = summaryText(this.result.levels, this.level);
     try {
       let copied = false;
       try { if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); copied = true; } }
