@@ -43,7 +43,8 @@
 .summary-edge-blur[data-edge=top]{top:0;--blur-direction:to top}
 .summary-edge-blur[data-edge=bottom]{bottom:0;--blur-direction:to bottom}
 .summary-edge-layer{position:absolute;inset:0;pointer-events:none;opacity:var(--edge-visibility,1);-webkit-backdrop-filter:blur(var(--layer-blur));backdrop-filter:blur(var(--layer-blur));-webkit-mask-image:var(--layer-mask);mask-image:var(--layer-mask)}
-.summary-edge-blur::after{content:"";position:absolute;inset:0;background:linear-gradient(var(--blur-direction),transparent 20%,rgb(0 0 0 / .12));opacity:var(--edge-visibility,1);pointer-events:none}
+/* Smooth opacity ramp across the entire tint band, with gentle slopes at both ends. */
+.summary-edge-blur::after{content:"";position:absolute;inset:0;background:linear-gradient(var(--blur-direction),rgb(0 0 0 / 0) 0%,rgb(0 0 0 / .003) 10%,rgb(0 0 0 / .0125) 20%,rgb(0 0 0 / .026) 30%,rgb(0 0 0 / .042) 40%,rgb(0 0 0 / .06) 50%,rgb(0 0 0 / .078) 60%,rgb(0 0 0 / .094) 70%,rgb(0 0 0 / .1075) 80%,rgb(0 0 0 / .117) 90%,rgb(0 0 0 / .12) 100%);opacity:var(--edge-visibility,1);pointer-events:none}
 .summary-edge-blur[data-edge=top]::after{display:none}
 .summary-edge-blur[data-edge=bottom]::after{top:auto;height:120%}
 .summary-text{font-size:var(--text-size);line-height:var(--leading);letter-spacing:0;margin:0;color:var(--body-color);text-wrap:pretty;overflow-wrap:break-word;max-width:70ch}

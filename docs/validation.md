@@ -107,3 +107,11 @@ The counter follows one numeric timeline through every integer between rounded d
 Per the user's clarification, the **top** blur band has no dark tint. The **bottom** tint overlay is 120% of its previous height and remains anchored at the bottom. Blur layer strengths, top/bottom blur heights, and text-mask clearance are unchanged.
 
 `npm run verify` passed: type checking, lint, 53 tests, and production builds. Four new pure counter-path tests cover intermediate values, zero-ending reels, carry/borrow synchronization, and interrupted reversal. Browser checks now include reverse mid-sentence keyframes, delayed gap closure, numeric ones-reel travel, absence of finishing accent animation, and independently measured tint/blur heights. All 31 checks passed on desktop and narrow viewports during validation; no console errors were observed. The design studio runs the shared controllers and now exposes only rolling blur and roll duration in its counter section. No provider/backend behavior changed and no AI calls were required.
+
+## 2026-10-14 — restore shortening and soften footer tint
+
+Restored `src/ui/reveal.ts` exactly to the previously approved implementation at `9cdfcc2`: quick 180ms exits with bounded stagger and immediate 240ms gap closure. This removes the delayed layout and paragraph-height hold introduced in the last revision. Expansion retains its original reveal. Continuous integer counter rolls and removal of the finishing pulse remain unchanged.
+
+The bottom tint keeps its 120% height but now uses a smooth multi-stop opacity ramp across the full band, with gentle slopes near transparent and maximum tint. The top tint remains absent; blur layers, blur heights, and scrolling clearance remain unchanged. The studio embeds the same updated implementation.
+
+Validation: type checking, lint, all 56 current unit/integration tests, and production builds passed. All 31 browser checks passed at 1280×800, including shortening, interrupted reversals, counter continuity, final-line clearance, and independent tint/blur heights. No browser console errors. The reveal source matches the earlier version exactly. No AI calls or backend restart were needed. These checks use the production dialog in the development harness; reload the installed extension and refresh the source page to use the rebuild.

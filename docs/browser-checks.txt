@@ -1,5 +1,3 @@
-2026-10-14 — 31 motion/UI checks passed; desktop 1280×800 and narrow 319×800 validated.
-
 PASS · Loading controls are disabled in the fixed frame
 PASS · Opening focuses the dialog, not Close
 PASS · Bundled font loaded
@@ -10,8 +8,8 @@ PASS · Mid-sentence additions use the full blur-and-rise reveal
 PASS · Changed digits soften during the 720 ms roll
 PASS · Ones reel rolls through intermediate numbers between multiples of ten
 PASS · Counter has no pulse, fade, or scale animation
-PASS · Mid-sentence removal reverses the full 500 ms blur-and-rise reveal
-PASS · Shared words wait for departing details before closing their gaps
+PASS · Shortening restores the previous 180 ms exit
+PASS · Shared words close gaps immediately without holding paragraph height
 PASS · Shortening animates words out
 PASS · Rapid reversals resolve to the latest summary
 PASS · Shared words retain their DOM nodes

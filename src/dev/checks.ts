@@ -45,11 +45,11 @@ export async function runBrowserChecks(output: HTMLElement): Promise<void> {
     choose(0);
     const departingMiddle = [...paragraph.querySelectorAll('.removing .word-ink')].find(word => word.textContent === 'desks');
     const reverse = departingMiddle?.getAnimations()[0];
-    record('Mid-sentence removal reverses the full 500 ms blur-and-rise reveal', reverse?.effect?.getTiming().duration === 500 && (reverse.effect as KeyframeEffect).getKeyframes().at(-1)?.filter === 'blur(3px)');
-    record('Shared words wait for departing details before closing their gaps', [...paragraph.querySelectorAll('.word:not(.removing)')].some(word => word.getAnimations().some(a => Number(a.effect?.getTiming().delay) > 500)));
+    record('Shortening restores the previous 180 ms exit', reverse?.effect?.getTiming().duration === 180 && (reverse.effect as KeyframeEffect).getKeyframes().at(-1)?.filter === 'blur(3px)');
+    record('Shared words close gaps immediately without holding paragraph height', paragraph.style.minHeight === '' && [...paragraph.querySelectorAll('.word:not(.removing)')].flatMap(word => word.getAnimations()).every(a => Number(a.effect?.getTiming().delay) === 0));
     record('Shortening animates words out', [...paragraph.querySelectorAll('.removing .word-ink')].some(word => word.getAnimations().length > 0));
     for (const value of [4, 0, 3, 1, 4, 2]) { choose(value); await pause(35); }
-    await pause(3800);
+    await pause(300);
     record('Rapid reversals resolve to the latest summary', !paragraph.querySelector('.removing') && paragraph.textContent?.trim() === summaryText(result.levels, 2));
     record('Shared words retain their DOM nodes', firstWord === paragraph.querySelector('.word'));
     record('Footer remains fixed while text changes', Math.abs(input.getBoundingClientRect().y - footerY) < .5);
