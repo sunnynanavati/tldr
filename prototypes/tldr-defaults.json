@@ -34,10 +34,5 @@
   "progressiveScrollAware": true,
   "progressiveHeight": 20,
   "counterBlur": 1.5,
-  "counterRoll": 720,
-  "counterFade": 80,
-  "counterFadeOpacity": 18,
-  "counterFadeScale": 98.5,
-  "counterSpring": 320,
-  "counterOvershoot": 2.5
+  "counterRoll": 720
 }

@@ -97,3 +97,13 @@ Validation: `npm run verify` passed (type check, lint, 49 tests, production buil
 The browser checks exercise the production Shadow DOM dialog in the development harness. The installed native Chrome extension must be reloaded, followed by refreshing the source webpage, to pick up the new build; native context-menu invocation was not repeated in this pass.
 
 Screenshot: [Movable and resizable tray](screenshots/movable-resizable-tray.png).
+
+## 2026-10-14 — bidirectional reveal and continuous counter
+
+Shortening now uses the approved 500ms/29ms/3px word motion in reverse, rather than the previous 180ms exit cap. Exit easing is the time-reversed entrance curve. Removal follows reading order so a visible inline deletion starts before an offscreen tail. Shared words retain their prior positions until departing details fade, then close the gaps over 240ms. Replacement punctuation waits too, avoiding overlap. The paragraph temporarily retains its height to prevent early scroll clamping; interrupted changes sample the current visual state and cancel superseded timers/animations. Reduced motion remains immediate.
+
+The counter follows one numeric timeline through every integer between rounded display targets. Digit paths synchronize carry and borrow boundaries, including 90↔110 and 990→1000. Interrupted rolls retain their visible glyph pair and fractional position. The 720ms roll and 1.5px blur remain; pulse, fade, blink, scale, and spring choreography were removed, along with their obsolete studio controls/defaults. Counts still settle to approximate tens.
+
+Per the user's clarification, the **top** blur band has no dark tint. The **bottom** tint overlay is 120% of its previous height and remains anchored at the bottom. Blur layer strengths, top/bottom blur heights, and text-mask clearance are unchanged.
+
+`npm run verify` passed: type checking, lint, 53 tests, and production builds. Four new pure counter-path tests cover intermediate values, zero-ending reels, carry/borrow synchronization, and interrupted reversal. Browser checks now include reverse mid-sentence keyframes, delayed gap closure, numeric ones-reel travel, absence of finishing accent animation, and independently measured tint/blur heights. All 31 checks passed on desktop and narrow viewports during validation; no console errors were observed. The design studio runs the shared controllers and now exposes only rolling blur and roll duration in its counter section. No provider/backend behavior changed and no AI calls were required.

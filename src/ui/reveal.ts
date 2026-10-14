@@ -7,12 +7,13 @@ type Snapshot = { rect: DOMRect; opacity: string; transform: string; filter: str
 export class SummaryReveal {
   private animations: Animation[] = [];
   private removal: ReturnType<typeof setTimeout> | undefined;
+  private layoutRelease: ReturnType<typeof setTimeout> | undefined;
   private active: Entry[] = [];
   private ghosts: Entry[] = [];
   constructor(private summary: HTMLElement, private reduced: () => boolean, private changed: () => void, private tuning = () => settings) {}
   private cancel() {
     this.animations.forEach(animation => animation.cancel()); this.animations = [];
-    clearTimeout(this.removal);
+    clearTimeout(this.removal); clearTimeout(this.layoutRelease);
   }
   private create(text: string): Entry {
     const node = document.createElement('span'), ink = document.createElement('span');
@@ -28,12 +29,14 @@ export class SummaryReveal {
       const style = getComputedStyle(entry.ink);
       snapshots.set(entry, { rect: entry.node.getBoundingClientRect(), opacity: style.opacity, transform: style.transform, filter: style.filter });
     }
+    const previousHeight = this.summary.getBoundingClientRect().height;
     this.cancel();
     const tokens = levels[level]!.runs.flatMap(run => {
       const parts = /[\u3040-\u30ff\u3400-\u9fff\u0e00-\u0e7f]/u.test(run.text) ? wordTokens(run.text) : run.text.split(/(\s+)/u);
       return parts.filter(Boolean).map(text => ({ text, emphasis: run.emphasis, space: /^\s+$/u.test(text) }));
     });
     const words = tokens.filter(token => !token.space);
+    const contracting = words.length < this.active.length;
     const matches = matchWords(this.active.map(entry => entry.text), words.map(token => token.text));
     const used = new Set<Entry>(), additions: Entry[] = [];
     const next = words.map((word, index) => {
@@ -47,7 +50,9 @@ export class SummaryReveal {
       entry.ink.className = `word-ink${word.emphasis ? ' emphasis' : ''}`;
       return entry;
     });
-    const retiring = [...this.active, ...this.ghosts].filter(entry => !used.has(entry));
+    const retiring = [...this.active, ...this.ghosts].filter(entry => !used.has(entry) && (!animate || Number(snapshots.get(entry)?.opacity ?? 0) > .001));
+    const exitDelay = animate && contracting && retiring.length ? settings.duration + (retiring.length - 1) * settings.stagger : 0;
+    this.summary.style.minHeight = exitDelay ? `${previousHeight}px` : '';
     const fragment = document.createDocumentFragment(); let wordIndex = 0;
     for (const token of tokens) fragment.append(token.space ? document.createTextNode(token.text) : next[wordIndex++]!.node);
     this.summary.replaceChildren(fragment); this.active = next; this.ghosts = [];
@@ -60,7 +65,7 @@ export class SummaryReveal {
       const dx = old.rect.left - destination.left, dy = old.rect.top - destination.top;
       if (Math.abs(dx) > .1 || Math.abs(dy) > .1) this.animations.push(entry.node.animate([
         { transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' },
-      ], { duration: 240, easing: EASE }));
+      ], { duration: 240, delay: exitDelay, easing: EASE, fill: 'backwards' }));
     });
     const origin = this.summary.getBoundingClientRect();
     for (const entry of retiring) {
@@ -70,24 +75,28 @@ export class SummaryReveal {
       this.summary.append(entry.node); this.ghosts.push(entry);
     }
     const reveal = (entries: Entry[], exiting: boolean) => {
-      const duration = !exiting ? settings.duration : Math.min(settings.duration, 180);
-      const stagger = !exiting ? settings.stagger : Math.min(settings.stagger, 60 / Math.max(1, entries.length - 1));
+      const duration = !exiting || contracting ? settings.duration : Math.min(settings.duration, 180);
+      const stagger = !exiting || contracting ? settings.stagger : Math.min(settings.stagger, 60 / Math.max(1, entries.length - 1));
+      const delay = exiting ? 0 : exitDelay;
       const hidden = { opacity: '0', transform: 'translateY(5px)', filter: `blur(${settings.textBlur}px)` };
       const visible = { opacity: '1', transform: 'translateY(0)', filter: 'blur(0px)' };
-      (exiting ? [...entries].reverse() : entries).forEach((entry, index) => {
+      // Keep reading order on exit too, so visible inline edits respond before an offscreen tail.
+      entries.forEach((entry, index) => {
         const snapshot = snapshots.get(entry);
         const start = snapshot ? { opacity: snapshot.opacity, transform: snapshot.transform, filter: snapshot.filter } : hidden;
         this.animations.push(entry.ink.animate([start, exiting ? hidden : visible], {
-          duration, delay: index * stagger, easing: EASE, fill: exiting ? 'both' : 'backwards',
+          duration, delay: delay + index * stagger, easing: exiting && contracting ? 'cubic-bezier(.68,0,.77,0)' : EASE, fill: exiting ? 'both' : 'backwards',
         }));
       });
-      return entries.length ? duration + (entries.length - 1) * stagger : 0;
+      return entries.length ? delay + duration + (entries.length - 1) * stagger : 0;
     };
     const entryTime = reveal(additions, false), exitTime = reveal(this.ghosts, true);
     if (this.ghosts.length) this.removal = setTimeout(() => {
       this.ghosts.forEach(entry => entry.node.remove()); this.ghosts = []; this.changed();
     }, exitTime);
-    this.changed(); return Math.max(entryTime, exitTime, initial ? 0 : 240);
+    const total = Math.max(entryTime, exitTime + (initial ? 0 : 240));
+    if (exitDelay) this.layoutRelease = setTimeout(() => { this.summary.style.minHeight = ''; this.changed(); }, total);
+    this.changed(); return total;
   }
-  reset() { this.cancel(); this.active = []; this.ghosts = []; this.summary.replaceChildren(); }
+  reset() { this.cancel(); this.active = []; this.ghosts = []; this.summary.replaceChildren(); this.summary.style.minHeight = ''; }
 }

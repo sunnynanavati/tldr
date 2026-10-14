@@ -1,4 +1,4 @@
-2026-10-14 — 26 checks passed at 1280×800 and 319×800.
+2026-10-14 — 31 motion/UI checks passed; desktop 1280×800 and narrow 319×800 validated.
 
 PASS · Loading controls are disabled in the fixed frame
 PASS · Opening focuses the dialog, not Close
@@ -8,6 +8,10 @@ PASS · Shared words animate into their new layout positions
 PASS · New details reveal in reading order
 PASS · Mid-sentence additions use the full blur-and-rise reveal
 PASS · Changed digits soften during the 720 ms roll
+PASS · Ones reel rolls through intermediate numbers between multiples of ten
+PASS · Counter has no pulse, fade, or scale animation
+PASS · Mid-sentence removal reverses the full 500 ms blur-and-rise reveal
+PASS · Shared words wait for departing details before closing their gaps
 PASS · Shortening animates words out
 PASS · Rapid reversals resolve to the latest summary
 PASS · Shared words retain their DOM nodes
@@ -16,6 +20,7 @@ PASS · Counter settles crisp and in its default color
 PASS · Pointer travel stays continuous
 PASS · Release snaps to the nearest preset
 PASS · Last line clears the footer fade
+PASS · Top band has no tint; bottom tint is 20% taller than unchanged blur
 PASS · Scrolling reveals the independent 64 px header blur
 PASS · Escape, outside click, and page scrolling leave the tray open
 PASS · Keyboard movement moves the tray without changing its size

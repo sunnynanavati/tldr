@@ -38,10 +38,18 @@ export async function runBrowserChecks(output: HTMLElement): Promise<void> {
     record('Mid-sentence additions use the full blur-and-rise reveal', middleAnimation?.effect?.getTiming().duration === 500 && (middleAnimation.effect as KeyframeEffect).getKeyframes()[0]?.filter === 'blur(3px)');
     await pause(110);
     record('Changed digits soften during the 720 ms roll', [...root.querySelectorAll<HTMLElement>('.counter-reel')].some(reel => parseFloat(getComputedStyle(reel).filter.replace('blur(', '')) > .5 && reel.getAnimations().some(a => a.effect?.getTiming().duration === 720)));
+    const ones = root.querySelectorAll<HTMLElement>('.counter-reel')[3]!;
+    record('Ones reel rolls through intermediate numbers between multiples of ten', ones.textContent!.includes('1234567890') && ones.getAnimations().some(a => a.effect?.getTiming().duration === 720));
+    record('Counter has no pulse, fade, or scale animation', root.querySelector('.counter-digits')!.getAnimations().length === 0);
+    await pause(2400);
     choose(0);
+    const departingMiddle = [...paragraph.querySelectorAll('.removing .word-ink')].find(word => word.textContent === 'desks');
+    const reverse = departingMiddle?.getAnimations()[0];
+    record('Mid-sentence removal reverses the full 500 ms blur-and-rise reveal', reverse?.effect?.getTiming().duration === 500 && (reverse.effect as KeyframeEffect).getKeyframes().at(-1)?.filter === 'blur(3px)');
+    record('Shared words wait for departing details before closing their gaps', [...paragraph.querySelectorAll('.word:not(.removing)')].some(word => word.getAnimations().some(a => Number(a.effect?.getTiming().delay) > 500)));
     record('Shortening animates words out', [...paragraph.querySelectorAll('.removing .word-ink')].some(word => word.getAnimations().length > 0));
     for (const value of [4, 0, 3, 1, 4, 2]) { choose(value); await pause(35); }
-    await pause(300);
+    await pause(3800);
     record('Rapid reversals resolve to the latest summary', !paragraph.querySelector('.removing') && paragraph.textContent?.trim() === summaryText(result.levels, 2));
     record('Shared words retain their DOM nodes', firstWord === paragraph.querySelector('.word'));
     record('Footer remains fixed while text changes', Math.abs(input.getBoundingClientRect().y - footerY) < .5);
@@ -51,12 +59,14 @@ export async function runBrowserChecks(output: HTMLElement): Promise<void> {
     record('Pointer travel stays continuous', Number(input.value) === 1.35);
     window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 7, isPrimary: true })); await pause(200);
     record('Release snaps to the nearest preset', Number(input.value) === 1);
-    choose(4); await pause(300);
+    choose(4); await pause(2600);
     const scroll = root.querySelector<HTMLElement>('#summary-scroll')!;
     scroll.scrollTop = scroll.scrollHeight; await pause(70);
     const last = paragraph.querySelector<HTMLElement>('.word:not(.removing):last-of-type')!;
     const bottom = parseFloat(root.querySelector<HTMLElement>('#summary-blur-bottom')!.style.getPropertyValue('--edge-height'));
     record('Last line clears the footer fade', last.getBoundingClientRect().bottom <= scroll.getBoundingClientRect().bottom - bottom - 7);
+    const bottomBand = root.querySelector<HTMLElement>('#summary-blur-bottom')!;
+    record('Top band has no tint; bottom tint is 20% taller than unchanged blur', getComputedStyle(root.querySelector('#summary-blur-top')!, '::after').display === 'none' && Math.abs(parseFloat(getComputedStyle(bottomBand, '::after').height) - bottom * 1.2) < 1 && Math.abs(bottom - card.clientHeight * .2) < 1);
     record('Scrolling reveals the independent 64 px header blur', !root.querySelector<HTMLElement>('#summary-blur-top')!.hidden && root.querySelector<HTMLElement>('#summary-blur-top')!.style.getPropertyValue('--edge-height') === '64px');
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
