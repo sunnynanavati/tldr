@@ -9,7 +9,7 @@ export class SummaryReveal {
   private removal: ReturnType<typeof setTimeout> | undefined;
   private active: Entry[] = [];
   private ghosts: Entry[] = [];
-  constructor(private summary: HTMLElement, private reduced: () => boolean, private changed: () => void) {}
+  constructor(private summary: HTMLElement, private reduced: () => boolean, private changed: () => void, private tuning = () => settings) {}
   private cancel() {
     this.animations.forEach(animation => animation.cancel()); this.animations = [];
     clearTimeout(this.removal);
@@ -20,6 +20,7 @@ export class SummaryReveal {
     return { node, ink, text };
   }
   render(levels: SummaryLevel[], level: number, initial = false, instant = false): number {
+    const settings = this.tuning();
     const animate = !instant && !this.reduced();
     const snapshots = new Map<Entry, Snapshot>();
     // Read current visual positions before cancelling interrupted animations.

@@ -7,7 +7,7 @@ export class WordCounter {
   private slots: Slot[];
   private value: number | null = null;
   private accent: Animation | null = null;
-  constructor(private digits: HTMLElement, private readable: HTMLElement, private reduced: () => boolean) {
+  constructor(private digits: HTMLElement, private readable: HTMLElement, private reduced: () => boolean, private tuning = () => settings) {
     this.slots = Array.from({ length: 3 }, () => {
       const cell = document.createElement('span'); cell.className = 'counter-digit';
       const window = document.createElement('span'); window.className = 'counter-window';
@@ -45,6 +45,7 @@ export class WordCounter {
     this.paint(slot, glyphs); slot.target = digit;
     const from = `translateY(${-offset * height}px)`, to = `translateY(${-target * height}px)`;
     slot.reel.style.transform = to; slot.reel.style.filter = 'blur(0px)';
+    const settings = this.tuning();
     const roll = settings.counterRoll, softBlur = `blur(${settings.counterBlur}px)`;
     const animation = slot.reel.animate([{ transform: from }, { transform: to }], { duration: roll, easing: EASE });
     slot.softening = slot.reel.animate([
@@ -64,6 +65,7 @@ export class WordCounter {
     const digits = String(words).padStart(3, ' ');
     if (instant || this.reduced() || previous === null) { this.slots.forEach((slot, i) => this.settleDigit(slot, digits[i]!)); return; }
     this.slots.forEach((slot, i) => this.roll(slot, digits[i]!, words > previous ? 1 : -1));
+    const settings = this.tuning();
     const roll = settings.counterRoll, pulse = 160, dip = settings.counterFade, rebound = settings.counterSpring;
     const total = roll + pulse + dip + rebound;
     const frame = (time: number, scale: number, opacity = 1) => ({ offset: time / total, transform: `scale(${scale})`, opacity, easing: EASE });

@@ -68,3 +68,9 @@ Chrome 120+ on ordinary HTTP/HTTPS pages. Restricted browser pages, the Chrome W
 See `docs/validation.md`, `docs/browser-checks.txt`, and `docs/screenshots/` for the verification record. Live model quality remains a separate check from deterministic UI and contract tests.
 
 After updating from the original append-only build, reload TLDR at `chrome://extensions` and refresh the source page. The backend and extension must both use the new `levels` response contract.
+
+## Design studio
+
+Run `npm run dev`, then open [Glass studio](http://127.0.0.1:4174/prototypes/tldr.html). The studio starts from the same locked preset as the extension, with current hybrid expansion, keyword fixtures, rolling counter, and slider behavior. **Reset to live** restores that baseline; individual resets and **Copy settings** remain available. Experiments autosave locally in `tldr.glass-studio.v4` and never modify the extension. Earlier v3 experiments remain stored separately.
+
+`npm run sync:studio` embeds the shared preset, dialog CSS/markup, animation controllers, and fixtures into the standalone `prototypes/tldr.html`. Production builds run this sync automatically to keep the studio current. The HTML still works offline without runtime dependencies or AI calls. Its settings remain independent from the locked extension preset until explicitly promoted.
