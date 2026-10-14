@@ -79,7 +79,7 @@ export function restrainEmphasis(level: SummaryLevel): SummaryLevel {
     return words.length > 0 && words.every(word => ranges.some(range => range.emphasis
       && range.start <= sentence.index + word.index && range.end >= sentence.index + word.index + word.segment.length));
   });
-  let budget = Math.floor(wordCount(text) * .2), phrases = 0;
+  let budget = Math.max(1, Math.ceil(wordCount(text) * .2)), phrases = 0;
   return { runs: merged.map((run, index) => {
     const count = wordCount(run.text);
     const emphasis = run.emphasis && count > 0 && count <= 4 && count <= budget

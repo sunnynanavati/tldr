@@ -12,6 +12,11 @@ if (!apiKey) {
     console.log(`${name}: source ${wordCount(text)} words · received ${model.levels.length} levels · counts ${levelCounts(model.levels).join(', ')}`);
     const result = validateSummary(request, model);
     console.log(`${name}: ${result.levels.length} levels · counts ${result.wordCounts.join(', ')}`);
+    for (const level of result.levels) {
+      const highlights = level.runs.filter(run => run.emphasis).map(run => run.text);
+      if (wordCount(level.runs.map(run => run.text).join('')) > 1 && !highlights.length) throw new Error('Missing summary highlights');
+      console.log(`Highlights: ${highlights.join(' | ')}`);
+    }
     // Authored, public fixtures only. Output supports manual fidelity review.
     console.log(result.levels.map(segment => segment.runs.map(run => run.text).join('')).join(' '));
   }
