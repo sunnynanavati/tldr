@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SummaryRequestSchema, SummaryResponseSchema, cumulativeCounts, lengthTargets, summaryText, validateSummary, wordCount } from '../src/shared/summary';
+import { SummaryRequestSchema, SummaryResponseSchema, cumulativeCounts, lengthTargets, modelSummarySchema, summaryText, validateSummary, wordCount } from '../src/shared/summary';
 import { fixtureSource, fixtureSegments, shortSource, shortSegments, chineseSource, chineseSegments } from '../src/dev/fixtures';
 
 describe('summary contract', () => {
@@ -19,6 +19,16 @@ describe('summary contract', () => {
     expect(lengthTargets(40).at(-1)).toBeLessThan(40);
     expect(lengthTargets(39)).toHaveLength(1);
     expect(validateSummary({ requestId: crypto.randomUUID(), text: shortSource }, { segments: shortSegments }).segments).toHaveLength(1);
+  });
+  it('constrains provider output to the requested number of levels or already-concise output', () => {
+    const long = modelSummarySchema(wordCount(fixtureSource));
+    const short = modelSummarySchema(wordCount(shortSource));
+    expect(long.safeParse({ segments: fixtureSegments }).success).toBe(true);
+    expect(long.safeParse({ segments: fixtureSegments.slice(0, 4) }).success).toBe(false);
+    expect(long.safeParse({ segments: shortSegments }).success).toBe(false);
+    expect(short.safeParse({ segments: shortSegments }).success).toBe(true);
+    expect(short.safeParse({ segments: fixtureSegments }).success).toBe(false);
+    expect(short.safeParse({ segments: [] }).success).toBe(true);
   });
   it('rejects empty or oversized selections and fabricated counts', () => {
     expect(SummaryRequestSchema.safeParse({ requestId: crypto.randomUUID(), text: ' '.repeat(10) }).success).toBe(false);

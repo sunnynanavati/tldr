@@ -7,6 +7,13 @@ export const RunSchema = z.object({ text: z.string().min(1).max(4000), emphasis:
 export const SegmentSchema = z.object({ runs: z.array(RunSchema).min(1).max(80) }).strict();
 // Empty provider output is a deliberate "already concise" signal, never a successful API response.
 export const ModelSummarySchema = z.object({ segments: z.array(SegmentSchema).max(5) }).strict();
+export function modelSummarySchema(sourceWords: number) {
+  const count = sourceWords < SHORT_PASSAGE_WORDS ? 1 : 5;
+  return z.object({ segments: z.union([
+    z.array(SegmentSchema).length(0),
+    z.array(SegmentSchema).length(count),
+  ]) }).strict();
+}
 export const SummaryRequestSchema = z.object({
   requestId: z.string().uuid(), text: z.string().trim().min(1).max(MAX_INPUT_CHARS),
 }).strict();

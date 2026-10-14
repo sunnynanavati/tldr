@@ -43,6 +43,18 @@ Further native Chrome interaction was interrupted by activity in the user's brow
 
 Started the built server on `127.0.0.1:4317` and verified authenticated `/health` returns `200 { "ready": false }` without a provider key. A real summary request returns a concise `503 setup` response instructing the user to add the key. Both test backend processes were stopped afterward so port 4317 is free for `npm run dev:server` after adding the key. The independent component preview remains running on port 4174.
 
-## Remaining credential-gated verification
+## Live AI follow-up — 14 October 2026
 
-Add `OPENAI_API_KEY` to the ignored `.env`, start/restart the backend, and run `npm run test:ai`. The smoke test checks the contract and shortening for authored English and Chinese inputs and prints summaries for manual factual/language review. Live model availability, latency, factual fidelity, and multilingual quality have **not** been verified in this workspace without that key.
+The user saved the OpenAI key in the ignored `.env`. Restarted the backend; authenticated health now returns `200 { "ready": true }`.
+
+The first live smoke test failed semantic validation. Tightened the provider schema to allow only the requested one or five segments, or an empty already-concise signal, and clarified that word targets are cumulative. Added a regression test for the provider schema. Type checking, linting, all **28 tests**, and production builds pass.
+
+`npm run test:ai` then passed for all three authored fixtures:
+
+- Long English passage: 191 source words → five cumulative lengths of 15, 26, 51, 74, 115 words.
+- Short English passage: 26 source words → one 21-word summary.
+- Chinese passage: 32 Unicode word units → one 27-unit summary in Chinese.
+
+Reviewed those outputs against the authored sources: they preserved the main facts and source language. This small smoke test does not establish broad summarization quality across arbitrary websites or languages.
+
+Also verified the authenticated production `POST /v1/summaries` route with the long fixture: `200`, matching request ID, and five cumulative counts of 20, 38, 52, 76, 108. The backend remains running on `127.0.0.1:4317`; the extension settings status refreshes when the user chooses **Save & test connection**. Native clipboard paste and browser zoom checks remain outstanding as described above.
