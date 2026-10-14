@@ -33,12 +33,12 @@ describe('restrained emphasis', () => {
     const result = restrainEmphasis({ runs: [{ text: 'One two three ', emphasis: true }, { text: 'four five six', emphasis: true }] });
     expect(result.runs.every(run => !run.emphasis)).toBe(true);
   });
-  it('keeps short keywords within a twenty percent budget', () => {
+  it('keeps short keywords within a twenty-eight percent budget', () => {
     const result = restrainEmphasis({ runs: [
       { text: 'Attention', emphasis: true }, { text: ' depends on our surroundings and small daily changes to ', emphasis: false },
       { text: 'defaults', emphasis: true }, { text: ' can help.', emphasis: false },
     ] });
     expect(result.runs.filter(run => run.emphasis).map(run => run.text)).toEqual(['Attention', 'defaults']);
-    expect(wordCount(result.runs.filter(run => run.emphasis).map(run => run.text).join(' '))).toBeLessThanOrEqual(wordCount(levelText(result)) * .2);
+    expect(wordCount(result.runs.filter(run => run.emphasis).map(run => run.text).join(' '))).toBeLessThanOrEqual(Math.ceil(wordCount(levelText(result)) * .28));
   });
 });

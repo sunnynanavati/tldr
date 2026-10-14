@@ -8,6 +8,8 @@ import { DetailSlider } from './slider';
 import { SummaryReveal } from './reveal';
 import { EdgeBlur } from './blur';
 import { placePanel, type Anchor } from './placement';
+import { TrayGeometry, viewport, type TrayBox } from './geometry';
+import { countLabel } from './count';
 import { levelNames, summaryText, type SummaryResult } from '../shared/summary';
 import type { SummaryState } from '../shared/session';
 
@@ -24,6 +26,7 @@ export class TldrDialog {
   private slider: DetailSlider;
   private reveal: SummaryReveal;
   private edges: EdgeBlur;
+  private geometry: TrayGeometry;
   private summary: HTMLElement;
   private readable: HTMLElement;
   private scroll: HTMLElement;
@@ -64,16 +67,10 @@ export class TldrDialog {
     this.reveal = new SummaryReveal(this.summary, this.reduced, () => this.edges?.schedule());
     document.documentElement.append(this.host); this.position(); this.host.showPopover();
     this.edges = new EdgeBlur(this.card, this.scroll, byId('summary-blur-top'), byId('summary-blur-bottom'));
+    this.geometry = new TrayGeometry(this.card, () => this.host.getBoundingClientRect(), this.applyBox);
     const options = { signal: this.events.signal };
     byId('close-dialog').addEventListener('click', () => actions.close(), options);
     this.copy.addEventListener('click', () => { void this.copySummary(); }, options);
-    document.addEventListener('pointerdown', event => { if (!event.composedPath().includes(this.host)) actions.close(); }, { ...options, capture: true });
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); actions.close(); }
-    }, { ...options, capture: true });
-    document.addEventListener('scroll', event => {
-      if (!event.composedPath().includes(this.host)) actions.close();
-    }, { ...options, capture: true, passive: true });
     this.card.addEventListener('wheel', event => {
       if (this.scroll.contains(event.target as Node) || event.ctrlKey || !event.deltaY) return;
       const unit = event.deltaMode === 1 ? 13 * 1.54 : event.deltaMode === 2 ? this.scroll.clientHeight : 1;
@@ -89,9 +86,11 @@ export class TldrDialog {
   }
   private reduced = () => this.motionOverride?.() ?? this.preference.matches;
   private position = () => {
-    const viewport = window.visualViewport;
-    const box = placePanel({ width: viewport?.width ?? innerWidth, height: viewport?.height ?? innerHeight, left: viewport?.offsetLeft, top: viewport?.offsetTop }, this.anchor);
-    for (const [name, value] of Object.entries(box)) this.host.style.setProperty(name, `${value}px`, 'important');
+    if (this.geometry?.modified) { this.geometry.clamp(); return; }
+    this.applyBox(placePanel(viewport(), this.anchor));
+  };
+  private applyBox = (box: TrayBox) => {
+    for (const name of ['left', 'top', 'width', 'height'] as const) this.host.style.setProperty(name, `${box[name]}px`, 'important');
     this.edges?.schedule();
   };
   state(state: SummaryState): void {
@@ -145,7 +144,7 @@ export class TldrDialog {
     const total = this.reveal.render(this.result.levels, this.level, initial, instant);
     const text = summaryText(this.result.levels, this.level), count = this.result.wordCounts[this.level]!;
     this.readable.textContent = text; this.counter.set(count, initial || instant);
-    this.input.setAttribute('aria-valuetext', this.result.levels.length === 1 ? `${count} words, compact summary` : `${levelNames[this.level]}, ${count} words, level ${this.level + 1} of 5`);
+    this.input.setAttribute('aria-valuetext', this.result.levels.length === 1 ? `${countLabel(count)}, compact summary` : `${levelNames[this.level]}, ${countLabel(count)}, level ${this.level + 1} of 5`);
     this.settledTimer = window.setTimeout(() => { this.announcement.textContent = text; this.edges.schedule(); }, Math.max(total, 120));
   }
   private async copySummary() {
@@ -170,7 +169,7 @@ export class TldrDialog {
   destroy() {
     if (!this.alive) return; this.alive = false; ++this.revision;
     clearTimeout(this.settledTimer); clearTimeout(this.copyTimer); this.events.abort();
-    this.slider.destroy(); this.counter.reset(); this.reveal.reset(); this.edges.destroy();
+    this.geometry.destroy(); this.slider.destroy(); this.counter.reset(); this.reveal.reset(); this.edges.destroy();
     const restore = this.root.activeElement !== null; this.host.remove(); this.result = null;
     if (restore && this.previousFocus instanceof HTMLElement && this.previousFocus.isConnected) this.previousFocus.focus({ preventScroll: true });
     this.previousFocus = null;

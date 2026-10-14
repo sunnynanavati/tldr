@@ -8,3 +8,6 @@ export { summaryText, wordCount } from '../shared/summary';
 import { fixtureLevels } from './fixtures';
 import { restrainEmphasis } from '../shared/summary';
 export const levels = fixtureLevels.map(restrainEmphasis);
+
+export { TrayGeometry } from '../ui/geometry';
+export { approximateCount, countLabel } from '../ui/count';

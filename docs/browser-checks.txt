@@ -1,9 +1,12 @@
+2026-10-14 — 26 checks passed at 1280×800 and 319×800.
+
 PASS · Loading controls are disabled in the fixed frame
 PASS · Opening focuses the dialog, not Close
 PASS · Bundled font loaded
 PASS · Initial reveal uses the approved 500 ms duration
 PASS · Shared words animate into their new layout positions
 PASS · New details reveal in reading order
+PASS · Mid-sentence additions use the full blur-and-rise reveal
 PASS · Changed digits soften during the 720 ms roll
 PASS · Shortening animates words out
 PASS · Rapid reversals resolve to the latest summary
@@ -14,6 +17,12 @@ PASS · Pointer travel stays continuous
 PASS · Release snaps to the nearest preset
 PASS · Last line clears the footer fade
 PASS · Scrolling reveals the independent 64 px header blur
-PASS · Escape dismisses and removes the dialog
+PASS · Escape, outside click, and page scrolling leave the tray open
+PASS · Keyboard movement moves the tray without changing its size
+PASS · Resize buttons provide a click alternative to dragging
+PASS · Keyboard resizing supports one-pixel fine adjustment
+PASS · Resizing retains last-line clearance above the footer
+PASS · Viewport updates retain manually adjusted geometry
+PASS · Close removes the tray
 PASS · Reduced motion renders complete text with no word or counter animation
 PASS · Keyboard End selects the longest preset

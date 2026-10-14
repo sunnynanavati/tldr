@@ -1,6 +1,6 @@
 # TLDR — approved UI baseline
 
-Approved by the user on October 13, 2026. This is the visual and interaction reference for the TLDR component implementation.
+Approved by the user on October 13, 2026, with interaction refinements requested October 14, 2026. This is the visual and interaction reference for the TLDR component implementation.
 
 The current browser preset matches both the inline defaults in [tldr.html](tldr.html) and the persistent backup in [tldr-defaults.json](tldr-defaults.json). Reset all and individual resets restore this approved preset. Existing browser preferences continue to persist normally.
 
@@ -9,7 +9,7 @@ The current browser preset matches both the inline defaults in [tldr.html](tldr.
 - One dark dialog with a subtle illuminated edge and a gradient from surface level 2 at 95% tint to the darker lower surface at 98% tint. Backdrop blur is 1px.
 - Configured width 320px and overall height 420px, with 36px corners and 20px content padding. Width clamps to the available viewport.
 - Header: TLDR mark and name on the left; Copy and Close on the right.
-- Footer: centered word count above the horizontal length slider. Preserve the tight spacing, the 32px slider hit area, and the fixed footer position.
+- Footer: centered approximate word count (“~ x words,” rounded up to tens) above the horizontal length slider. Preserve the tight spacing, the 32px slider hit area, and the fixed footer position.
 - Embedded Inter Variable typography: body 13px with 1.54 line height, white emphasized phrases, and secondary text at 75% brightness. The counter uses the same secondary color.
 - The scroller spans the whole dialog and lets text pass behind the header and footer. At the end of scrolling, the last line clears the footer fade by about 8px.
 - Top progressive blur ends 12px below the header (64px at the approved padding) and follows scrolling. Footer progressive blur covers 20% of the inner dialog height and stays visible.
@@ -17,13 +17,14 @@ The current browser preset matches both the inline defaults in [tldr.html](tldr.
 
 ## Interaction and motion
 
-- Initial detail is Balanced: the middle of five authored lengths. The offline fixture has 20, 35, 56, 83, and 111 words.
+- Initial detail is Balanced: the middle of five authored lengths. The current hybrid offline fixture has 20, 35, 50, 80, and 110 words.
 - The slider tracks the pointer continuously, selects the nearest summary preset while dragging, and settles onto that preset over 160ms on release. Keyboard arrows move one preset; Home/End select the endpoints.
-- Initial summary reveal: a 5px upward word reveal, 500ms duration, 29ms word stagger, and 3px blur. Expansion and shortening preserve shared words and settle within 240ms.
+- Initial summary reveal: a 5px upward word reveal, 500ms duration, 29ms word stagger, and 3px blur. Expansion preserves shared words and uses the same reveal timing for new words anywhere in the paragraph. Shared words move into place over 240ms; exits finish within 240ms. The full expansion stagger is intentionally longer so inserted details are perceptible.
 - Changed counter digits roll vertically for 720ms. Their blur reaches 1.5px over 80ms, stays through 70% of the roll, and clears as the digits settle. Unchanged digits and the units stay steady.
 - Counter finish: pulse to 103.5% and back over 160ms; fade to 18% opacity and 98.5% scale over 80ms; spring through 102.5% to 100% over 320ms. Reappearance retains the default text color.
-- Rapid changes retarget the currently rendered digit position and blur and cancel superseded animation. Keep three fixed digit slots so the units and slider do not shift.
-- Copy, Close, Escape, reopening, and keyboard navigation remain functional. Reduced motion immediately presents final text and digits, with an immediate slider snap on release.
+- Rapid changes retarget the currently rendered digit position and blur and cancel superseded animation. Keep digit reels reusable through interruptions; the approximation mark and units remain readable. Four slots accommodate rounding 999 up to 1000. The footer and slider stay fixed during count changes.
+- Drag the header to move the tray; use the lower-right resize handle to resize. Click either handle for adjustment buttons, or focus it and use arrows (Shift for 1px steps). Bounds retain 16px viewport margins; minimum dimensions are 260px unless the viewport is smaller. The slider has 32px horizontal inset to leave room for the corner handle.
+- Only Close dismisses the active tray: outside clicks, Escape, and page scrolling leave it open. A new selection replaces it, and navigation ends the session. Copy, reopening, and keyboard navigation remain functional. Reduced motion immediately presents final text and digits, with an immediate slider snap on release.
 - The inspector is the prototype's tuning interface. Word-count settings have individual resets, persistence, and a preview transition.
 
 ## Frozen settings snapshot

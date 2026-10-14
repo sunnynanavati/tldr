@@ -53,3 +53,18 @@ input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;
 input[type=range]::-moz-range-track{height:3px;background:#ffffff25;border-radius:3px}input[type=range]::-moz-range-progress{height:3px;background:#dcdcdc}input[type=range]::-moz-range-thumb{height:13px;width:13px;border:0;background:#eee;border-radius:50%}
 .summary-length input[type=range]{height:32px}
 [dir=rtl] .summary-length input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(to left,#dcdcdc var(--fill),#ffffff25 var(--fill))}
+
+/* Pointer-following geometry has no delayed transition. */
+.dialog-header { cursor: grab; touch-action: none; user-select: none; }
+.move-handle { display:grid;place-items:center;width:24px;height:24px;margin:-4px;padding:4px;border:0;border-radius:6px;color:inherit;background:transparent;cursor:grab;touch-action:none;flex:none; }
+.resize-handle { position:absolute;right:8px;bottom:8px;z-index:3;display:grid;place-items:center;width:24px;height:24px;padding:0;border:0;border-radius:7px;background:transparent;color:#bfbfbf;cursor:nwse-resize;touch-action:none; }
+.glass .summary-length { inset-inline:max(var(--padding),32px); }
+.glass[data-manipulating] { user-select:none; transition:none; }
+.glass[data-manipulating=move] .dialog-header,.glass[data-manipulating=move] .move-handle { cursor:grabbing; }
+.glass[data-manipulating] .geometry-tools { display:none; }
+.geometry-tools { position:absolute;top:62px;left:var(--padding);right:var(--padding);z-index:4;display:flex;gap:4px;justify-content:center;padding:8px;border:1px solid #ffffff20;border-radius:12px;background:#252525;box-shadow:0 8px 20px #0006; }
+.geometry-tools[data-mode=resize] { top:auto;bottom:62px; }
+.geometry-tools button { min-width:32px;min-height:32px;padding:4px 8px;border:0;border-radius:6px;background:#ffffff0b;color:#eee;font:inherit;cursor:pointer; }
+.counter-prefix { margin-right:calc(-1 * var(--counter-leading,2ch)); }
+.glass[data-state=loading] .counter-prefix,.glass[data-state=error] .counter-prefix { display:none; }
+@media(hover:hover) and (pointer:fine) { .move-handle:hover,.resize-handle:hover,.geometry-tools button:hover { background:#ffffff16; } }

@@ -1,4 +1,5 @@
 import { EASE, settings } from './settings';
+import { approximateCount, countLabel } from './count';
 interface Slot {
   cell: HTMLSpanElement; reel: HTMLSpanElement; glyphs: string[]; target: string;
   animation: Animation | null; softening: Animation | null;
@@ -8,7 +9,7 @@ export class WordCounter {
   private value: number | null = null;
   private accent: Animation | null = null;
   constructor(private digits: HTMLElement, private readable: HTMLElement, private reduced: () => boolean, private tuning = () => settings) {
-    this.slots = Array.from({ length: 3 }, () => {
+    this.slots = Array.from({ length: 4 }, () => {
       const cell = document.createElement('span'); cell.className = 'counter-digit';
       const window = document.createElement('span'); window.className = 'counter-window';
       const reel = document.createElement('span'); reel.className = 'counter-reel';
@@ -57,12 +58,14 @@ export class WordCounter {
     animation.onfinish = () => { if (slot.animation === animation) this.settleDigit(slot, digit); };
   }
   set(words: number, instant = false) {
-    this.readable.textContent = `${words} words`;
+    this.readable.textContent = countLabel(words);
+    words = approximateCount(words);
+    this.digits.parentElement?.style.setProperty('--counter-leading', `${4 - String(words).length}ch`);
     if (words === this.value && !instant && !this.reduced()) return;
     const previous = this.value; this.value = words;
     const current = getComputedStyle(this.digits), from = { transform: current.transform, opacity: current.opacity };
     this.accent?.cancel(); this.accent = null;
-    const digits = String(words).padStart(3, ' ');
+    const digits = String(words).padStart(4, ' ');
     if (instant || this.reduced() || previous === null) { this.slots.forEach((slot, i) => this.settleDigit(slot, digits[i]!)); return; }
     this.slots.forEach((slot, i) => this.roll(slot, digits[i]!, words > previous ? 1 : -1));
     const settings = this.tuning();

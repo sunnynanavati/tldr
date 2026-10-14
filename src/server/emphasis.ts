@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { levelText, restrainEmphasis, wordCount, type ModelSummary, type SummaryLevel } from '../shared/summary';
 
-export const HighlightsSchema = z.array(z.string().min(1).max(80)).min(1).max(4)
+export const HighlightsSchema = z.array(z.string().min(1).max(80)).min(1).max(12)
   .describe('Required exact keywords or short phrases copied from the summary. The first is a single meaningful word present in every level.');
 
 // Explicit model-selected keywords are projected onto each complete level. This

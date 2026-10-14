@@ -70,8 +70,8 @@ export class SummaryReveal {
       this.summary.append(entry.node); this.ghosts.push(entry);
     }
     const reveal = (entries: Entry[], exiting: boolean) => {
-      const duration = initial && !exiting ? settings.duration : Math.min(settings.duration, 180);
-      const stagger = initial && !exiting ? settings.stagger : Math.min(settings.stagger, 60 / Math.max(1, entries.length - 1));
+      const duration = !exiting ? settings.duration : Math.min(settings.duration, 180);
+      const stagger = !exiting ? settings.stagger : Math.min(settings.stagger, 60 / Math.max(1, entries.length - 1));
       const hidden = { opacity: '0', transform: 'translateY(5px)', filter: `blur(${settings.textBlur}px)` };
       const visible = { opacity: '1', transform: 'translateY(0)', filter: 'blur(0px)' };
       (exiting ? [...entries].reverse() : entries).forEach((entry, index) => {

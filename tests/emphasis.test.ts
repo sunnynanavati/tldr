@@ -28,3 +28,10 @@ describe('explicit summary keywords', () => {
     expect(highlightSummary({ levels: [] }, ['unused'])).toEqual({ levels: [] });
   });
 });
+
+it('retains frequent short highlights across a long summary, without highlighting sentences', () => {
+  const text = 'Attention is shaped by our everyday surroundings, from phones on desks to meeting schedules without breaks. Small changes to daily routines can make focused work easier than constant, automatic distraction. Notifications pull us between contexts, adding recovery time even after the interruption has ended. Rather than relying on willpower, redesign the defaults around you: silence unnecessary alerts, leave gaps between meetings, and keep your phone farther away. These adjustments create room for focused work without demanding a dramatic lifestyle change. The goal is to make a deliberate choice easier than an automatic one, rather than achieving perfect productivity or an empty inbox.';
+  const selected = ['Attention', 'phones', 'meeting schedules', 'Small changes', 'focused work', 'recovery time', 'redesign the defaults', 'unnecessary alerts', 'deliberate choice'];
+  expect(highlights(text, selected)).toEqual(selected);
+  expect(levelText(highlightSummary(model(text), selected).levels[0]!)).toBe(text);
+});
