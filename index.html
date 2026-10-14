@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TLDR · Extension test page</title></head><body>
+<main><nav><b>tldr. / development</b><button id="theme">Switch to dark page</button></nav>
+<header><p class="eyebrow">EXTENSION FIXTURES</p><h1>A little more room<br>for what matters.</h1><p>Select a passage, right-click it, and choose TLDR. These authored passages also support the offline preview.</p></header>
+<div class="tools"><label>Preview scenario <select id="scenario"><option value="normal">Normal</option><option value="slow">Slow loading</option><option value="error">Connection error</option><option value="race">Rapid replacement</option></select></label><button id="preview">Preview component</button><button id="rapid">Rapid slider reversals</button><button id="checks">Run browser checks</button></div><output id="check-results" aria-live="polite"></output>
+<article><div class="section-label"><h2>Attention and its surroundings</h2><button data-select="long">Select passage</button></div><p id="long"></p>
+<div class="section-label"><h2>A shorter selection</h2><button data-select="short">Select passage</button></div><p id="short"></p>
+<div class="section-label"><h2>Another language</h2><button data-select="chinese">Select passage</button></div><p id="chinese" lang="zh"></p></article>
+<p class="note">Offline previews use source-matched fixtures. The installed extension uses your local backend. <a href="/tests/strict.html">Strict CSP test page →</a></p>
+</main><script type="module" src="/src/dev/main.ts"></script></body></html>

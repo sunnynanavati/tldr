@@ -1,0 +1,1 @@
+document.querySelector('#select').addEventListener('click',()=>{const range=document.createRange();range.selectNodeContents(document.querySelector('#passage'));const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range)});document.querySelector('#theme').addEventListener('click',()=>document.body.classList.toggle('dark'));

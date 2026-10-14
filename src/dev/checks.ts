@@ -1,0 +1,60 @@
+import { TldrDialog } from '../ui/dialog';
+import { fixtureResult, fixtureSource } from './fixtures';
+import { summaryText } from '../shared/summary';
+
+// Browser-executed integration checks, deliberately excluded from the extension build.
+export async function runBrowserChecks(output: HTMLElement): Promise<void> {
+  const lines: string[] = [];
+  const record = (name: string, pass: boolean) => { lines.push(`${pass ? 'PASS' : 'FAIL'} · ${name}`); output.textContent = lines.join('\n'); };
+  output.style.whiteSpace = 'pre-wrap'; output.textContent = 'Running browser checks…';
+  const pause = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const result = fixtureResult({ requestId: crypto.randomUUID(), text: fixtureSource });
+  let view!: TldrDialog;
+  const make = (reduced?: () => boolean) => new TldrDialog(null, { close: () => view.destroy(), retry: () => {}, settings: () => {} }, reduced);
+  view = make();
+  try {
+    view.state({ status: 'loading', requestId: result.requestId });
+    const root = view.root;
+    const card = root.querySelector<HTMLElement>('.glass')!;
+    const input = root.querySelector<HTMLInputElement>('#detail')!;
+    const paragraph = root.querySelector<HTMLElement>('#summary')!;
+    const footerY = input.getBoundingClientRect().y;
+    record('Loading controls are disabled in the fixed frame', input.disabled && root.querySelector<HTMLButtonElement>('#copy-summary')!.disabled && card.getBoundingClientRect().height === Math.min(420, innerHeight - 32));
+    view.state({ status: 'ready', result });
+    for (let i = 0; i < 100 && !paragraph.querySelector('.word'); i++) await pause(30);
+    record('Bundled font loaded', document.fonts.check('13px "TLDR Inter"'));
+    record('Initial reveal uses the approved 500 ms duration', paragraph.querySelector('.word')?.getAnimations()[0]?.effect?.getTiming().duration === 500);
+    await pause(2900);
+    const firstWord = paragraph.querySelector('.word');
+    const choose = (value: number) => { input.value = String(value); input.dispatchEvent(new Event('input', { bubbles: true })); };
+    choose(4); await pause(110);
+    record('Changed digits soften during the 720 ms roll', [...root.querySelectorAll<HTMLElement>('.counter-reel')].some(reel => parseFloat(getComputedStyle(reel).filter.replace('blur(', '')) > .5 && reel.getAnimations().some(a => a.effect?.getTiming().duration === 720)));
+    choose(0);
+    record('Shortening animates words out', [...paragraph.querySelectorAll('.removing .word')].some(word => word.getAnimations().length > 0));
+    for (const value of [4, 0, 3, 1, 4, 2]) { choose(value); await pause(35); }
+    await pause(300);
+    record('Rapid reversals resolve to the latest summary', paragraph.querySelectorAll('.segment').length === 3 && !paragraph.querySelector('.removing') && paragraph.textContent?.trim() === summaryText(result.segments, 2));
+    record('Shared words retain their DOM nodes', firstWord === paragraph.querySelector('.word'));
+    record('Footer remains fixed while text changes', Math.abs(input.getBoundingClientRect().y - footerY) < .5);
+    await pause(1100);
+    record('Counter settles crisp and in its default color', [...root.querySelectorAll<HTMLElement>('.counter-reel')].every(reel => getComputedStyle(reel).filter === 'blur(0px)' && !reel.getAnimations().length) && root.querySelector('.counter-digits')?.textContent?.trim() === '56');
+    input.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 7, isPrimary: true, button: 0 })); choose(1.35);
+    record('Pointer travel stays continuous', Number(input.value) === 1.35);
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 7, isPrimary: true })); await pause(200);
+    record('Release snaps to the nearest preset', Number(input.value) === 1);
+    choose(4); await pause(300);
+    const scroll = root.querySelector<HTMLElement>('#summary-scroll')!;
+    scroll.scrollTop = scroll.scrollHeight; await pause(70);
+    const last = paragraph.querySelector<HTMLElement>('.segment:last-child .word:last-of-type')!;
+    const bottom = parseFloat(root.querySelector<HTMLElement>('#summary-blur-bottom')!.style.getPropertyValue('--edge-height'));
+    record('Last line clears the footer fade', last.getBoundingClientRect().bottom <= scroll.getBoundingClientRect().bottom - bottom - 7);
+    record('Scrolling reveals the independent 64 px header blur', !root.querySelector<HTMLElement>('#summary-blur-top')!.hidden && root.querySelector<HTMLElement>('#summary-blur-top')!.style.getPropertyValue('--edge-height') === '64px');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    record('Escape dismisses and removes the dialog', !view.host.isConnected);
+    view = make(() => true); view.state({ status: 'ready', result }); await pause(100);
+    record('Reduced motion renders complete text with no word or counter animation', view.root.querySelector('#summary')!.textContent!.trim() === summaryText(result.segments, 2) && view.root.querySelector('.glass')!.getAnimations({ subtree: true }).length === 0);
+    view.root.querySelector<HTMLInputElement>('#detail')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    record('Keyboard End selects the longest preset', view.root.querySelector('#word-count-readable')!.textContent === '111 words');
+  } catch (error) { record(`Browser check exception: ${error instanceof Error ? error.message : String(error)}`, false); }
+  finally { view.destroy(); }
+}
