@@ -22,6 +22,7 @@ export class EdgeBlur {
     const footerExtent = this.scroll.getBoundingClientRect().bottom - footer.getBoundingClientRect().top;
     const topHeight = header.getBoundingClientRect().height + 12;
     const bottomHeight = Math.max(footerExtent + 12, this.scroll.clientHeight * settings.progressiveHeight / 100);
+    this.bottom.style.setProperty('--footer-tint-height', `${this.dialog.clientHeight * settings.footerTintHeight / 100}px`);
     this.scroll.style.setProperty('--scroll-end-padding', `${Math.ceil(Math.max(footerExtent + 16, bottomHeight + 8))}px`);
     const visibility = { top: this.scroll.scrollTop > 1 ? Math.min(1, this.scroll.scrollTop / 24) : 0, bottom: 1 };
     for (const [edge, band, height] of [['top', this.top, topHeight], ['bottom', this.bottom, bottomHeight]] as const) {

@@ -10,20 +10,21 @@ Use Node 24. A project-local runtime was installed for validation without replac
 
 ```sh
 export PATH="$PWD/.runtime/node_modules/.bin:$PATH"
-npm run dev:server
+npm run service:install
+npm run service:status
 ```
 
-Only one backend can use port 4317 at a time. Stop an existing backend with Ctrl-C before changing between real and fixture mode. Open TLDR’s extension settings and choose **Save & test connection** to confirm that the backend and API configuration are ready. Then select text on an ordinary webpage, right-click, and choose **TLDR**.
+The macOS login service runs in the background, starts at login, and restarts after crashes. It does not need Terminal or Codex to stay open. Only one backend can use port 4317 at a time; run `npm run service:uninstall` before switching to manual development or fixture mode. Open TLDR’s extension settings and choose **Save & test connection** to confirm that the backend and API configuration are ready. Then select text on an ordinary webpage, right-click, and choose **TLDR**.
 
 ## Fresh setup
 
 1. Install/use Node 24 LTS (`.nvmrc` specifies 24), then run `npm ci` and `npm run build`.
 2. Open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select `dist/extension`.
 3. Create `.env` from `.env.example`. Add `OPENAI_API_KEY`, generate a local token with `npm run token`, and set `TLDR_EXTENSION_ID` to the ID Chrome shows. Keep `.env` private and untracked.
-4. Run `npm run dev:server` (or `npm start` after building).
+4. On macOS, run `npm run service:install` for the persistent backend. For manual development, use `npm run dev:server` (or `npm start` after building).
 5. Open the extension’s connection settings. Paste **TLDR_LOCAL_TOKEN**, save, and test. Never paste the OpenAI key into the extension.
 
-After source changes, run `npm run build`, click **Reload** on TLDR’s card in `chrome://extensions`, and reload pages that previously used TLDR. The backend reads `.env` at startup; restart it after editing that file.
+After source changes, run `npm run build`, click **Reload** on TLDR’s card in `chrome://extensions`, and reload pages that previously used TLDR. After backend source or project `.env` changes, run `npm run service:restart`; it rebuilds the installed backend and refreshes its private environment copy. `npm run build` alone does not update the installed service.
 
 ## Development and verification
 
@@ -47,9 +48,9 @@ The extension uses `activeTab` only after a context-menu invocation. A manual to
 
 `POST /v1/summaries` accepts `{ requestId, text }` and returns `{ requestId, levels, wordCounts }`. Each level is a complete summary with `runs: [{ text, emphasis }]`. Counts are computed exactly in code; the UI shows “~ x words,” rounded up to the nearest ten. Counter rolls travel through intermediate integers with blur, then settle directly without a finishing pulse or blink. Model output is rendered as text, never HTML.
 
-Passages with at least 40 Unicode words receive five progressively expanded levels; shorter passages receive one. Selections under four words get an instruction to select a complete sentence. Input is limited to 40,000 characters, two active requests, and ten attempts per minute. The backend aborts after 20 seconds and the UI times out after 25 seconds. A failed attempt offers Retry; dragging the slider makes no API calls.
+Passages with at least 40 Unicode words receive five progressively expanded levels; shorter passages receive one. Selections under four words get an instruction to select a complete sentence. Input is limited to 40,000 characters, two active requests, and ten attempts per minute. Passage requests use 20-second backend and 25-second UI deadlines; article jobs use 90 and 95 seconds respectively (see Adaptive summary lengths below). Sparse highlights in substantial new details trigger at most one corrective generation within that same backend deadline; this can use a second provider call. A failed attempt offers Retry; dragging the slider makes no API calls.
 
-For longer passages, the provider returns a composition plan with a shared lead sentence, a short insertion inside it, and ordered supporting parts. The backend compiles this into complete levels without rewriting retained words. Short selections use a single compact summary. The model selects 8–12 candidate keywords or short phrases, aiming for 15–25% emphasis distributed across each longer summary. The presentation guard permits up to ten phrases and a 28% word budget (rounded up to a whole word); whole-sentence emphasis is removed. The provider explicitly selects exact keywords, including one shared core keyword; the backend applies these and rejects multiword summaries with no usable highlight instead of silently rendering unhighlighted text. The renderer matches retained words, animates their new positions, and reveals inserted details in reading order using the approved 500ms/29ms/3px reveal, including mid-sentence additions. Shared words move into place over 240ms. Shortening uses the previous fast exit (180ms with a bounded stagger), while gaps close immediately over 240ms; rapid changes cancel superseded motion.
+For longer passages, the provider returns a composition plan with a shared lead sentence, a short insertion inside it, and ordered supporting parts. The backend compiles this into complete levels without rewriting retained words. Short selections use a single compact summary. The model annotates short prose runs with takeaway, qualifier, subject, supporting, or plain roles. Shared annotations retain the core as detail grows. The backend prioritizes the main takeaway, essential caveat, then context and supporting cues, and converts these into ordinary emphasis flags without separately quoted phrases. Subject-only output is rejected. Usually 1–3 words are emphasized per phrase; up to six are allowed to preserve meaning or negation. The guard permits `max(10, ceil(wordCount / 12))` phrases within `max(6, ceil(wordCount * .35))` highlighted words and excludes whole sentences. See [the highlight policy](docs/highlight-policy.md) and [live quality samples](docs/summary-quality-samples.md). The renderer matches retained words, animates their new positions, and reveals inserted details in reading order using the approved 500ms/29ms/3px reveal, including mid-sentence additions. Shared words move into place over 240ms. Shortening uses the previous fast exit (180ms with a bounded stagger), while gaps close immediately over 240ms; rapid changes cancel superseded motion.
 
 The default model is `gpt-6-luna` with reasoning disabled, strict structured output, and `store: false`. Set `OPENAI_MODEL` to change the model only if it supports the same API features. No automatic model substitution occurs.
 
@@ -74,3 +75,30 @@ After updating from the original append-only build, reload TLDR at `chrome://ext
 Run `npm run dev`, then open [Glass studio](http://127.0.0.1:4174/prototypes/tldr.html). The studio starts from the same locked preset as the extension, with current hybrid expansion, keyword fixtures, rolling counter, and slider behavior. **Reset to live** restores that baseline; individual resets and **Copy settings** remain available. Experiments autosave locally in `tldr.glass-studio.v4` and never modify the extension. Earlier v3 experiments remain stored separately.
 
 `npm run sync:studio` embeds the shared preset, dialog CSS/markup, animation controllers, and fixtures into the standalone `prototypes/tldr.html`. Production builds run this sync automatically to keep the studio current. The HTML still works offline without runtime dependencies or AI calls. Its settings remain independent from the locked extension preset until explicitly promoted.
+
+### Adaptive summary lengths
+
+Selections under 40 words get one compact summary. Longer selections have five targets. Ordinary passages retain approximately 20/35/55/80/110 words (scaled down when needed). For articles, Detailed grows to 25% of the source, capped at 800 words; Essential/Concise/Balanced/Expanded cap at 60/140/300/550. Targets are approximate, not forced padding; actual counts are measured and displayed rounded up to ten.
+
+| Source words | Essential | Concise | Balanced | Expanded | Detailed |
+| --- | --- | --- | --- | --- | --- |
+| 200 | 20 | 35 | 55 | 80 | 110 |
+| 1,000 | 45 | 80 | 125 | 182 | 250 |
+| 3,000 | 60 | 140 | 300 | 545 | 750 |
+| 4,000 | 60 | 140 | 300 | 550 | 800 |
+
+The 40,000-character input limit still applies. Provider output budget grows from 4,000 to 12,400 tokens, including annotations, rather than duplicating full levels. Highlight phrase limits grow with length. Word reveal retains its 500ms blur/rise, with the total stagger window capped at 3.2 seconds for long summaries. Passages retain the 20/25-second backend/extension deadlines. Articles use authenticated in-memory jobs with 90/95-second deadlines and one-second status polling, so each Chrome fetch is short. A 30-second polling lease cancels abandoned jobs; results are deleted after delivery or cancellation. Longer responses may cost more and take longer; timeout remains a retryable error. The design studio keeps its authored reference summaries.
+
+To exercise long articles through the running backend with an original synthetic report: `TLDR_SMOKE_HTTP=1 node --env-file-if-exists=.env --import tsx scripts/adaptive-smoke.ts`. This makes a paid provider request and saves counts and sample output in `docs/adaptive-summary-smoke.json`.
+
+## macOS background backend
+
+`npm run service:install` installs the current backend and Node 24 runtime into `~/Library/Application Support/TLDR/backend`, with a per-user launch agent at `~/Library/LaunchAgents/com.tldr.backend.plist`. The service directory is private (0700); its environment file is 0600. Credentials are read from a private copy of the project's `.env`, never embedded in the launch-agent plist. The service listens only on `127.0.0.1:4317` and keeps the same authentication. No administrator privileges or system-wide daemon are needed.
+
+- `npm run service:status`: checks launchd registration and authenticated backend readiness.
+- `npm run service:restart`: rebuilds/reinstalls the current backend and refreshes `.env` from the project. Use after source or credential changes.
+- `npm run service:uninstall`: stops the service, removes the login agent and its installed files/credential copy; preserves the project and original `.env`.
+
+The agent uses KeepAlive with a 10-second restart throttle. It runs while this user is logged in; it does not run before login, during sleep, or after logout. Startup errors go to the private service directory's `service-error.log`; regular output is discarded. Selected text, summaries, and credentials are not deliberately logged. If port 4317 belongs to a manually started backend, installation asks you to stop that process instead of killing an unknown listener.
+
+The extension cannot start a local OS process on its own. Previously, a backend launched from a temporary terminal session could disappear when that session ended, causing the recurring “Start the local TLDR backend” error. The login service removes that dependency.

@@ -1,7 +1,7 @@
 import { TldrDialog } from '../ui/dialog';
 import { fixtureResult, fixtureSource } from './fixtures';
 import { approximateCount, countLabel } from '../ui/count';
-import { summaryText } from '../shared/summary';
+import { levelCounts, summaryText } from '../shared/summary';
 
 // Browser-executed integration checks, deliberately excluded from the extension build.
 export async function runBrowserChecks(output: HTMLElement): Promise<void> {
@@ -66,7 +66,8 @@ export async function runBrowserChecks(output: HTMLElement): Promise<void> {
     const bottom = parseFloat(root.querySelector<HTMLElement>('#summary-blur-bottom')!.style.getPropertyValue('--edge-height'));
     record('Last line clears the footer fade', last.getBoundingClientRect().bottom <= scroll.getBoundingClientRect().bottom - bottom - 7);
     const bottomBand = root.querySelector<HTMLElement>('#summary-blur-bottom')!;
-    record('Top band has no tint; bottom tint is 20% taller than unchanged blur', getComputedStyle(root.querySelector('#summary-blur-top')!, '::after').display === 'none' && Math.abs(parseFloat(getComputedStyle(bottomBand, '::after').height) - bottom * 1.2) < 1 && Math.abs(bottom - card.clientHeight * .2) < 1);
+    record('Top band has no tint; bottom tint covers the full dialog at 50% opacity independently of blur', getComputedStyle(root.querySelector('#summary-blur-top')!, '::after').display === 'none' && Math.abs(parseFloat(getComputedStyle(bottomBand, '::after').height) - card.clientHeight) < 1 && getComputedStyle(card).getPropertyValue('--footer-tint-opacity').trim() === '0.5' && Math.abs(bottom - card.clientHeight * .2) < 1);
+    record('Edge blur samples an isolated text plane and stays enabled', getComputedStyle(root.querySelector('.summary-viewport')!).filter === 'opacity(1)' && [...bottomBand.querySelectorAll('.summary-edge-layer')].every(layer => getComputedStyle(layer).display !== 'none' && getComputedStyle(layer).backdropFilter !== 'none'));
     record('Scrolling reveals the independent 64 px header blur', !root.querySelector<HTMLElement>('#summary-blur-top')!.hidden && root.querySelector<HTMLElement>('#summary-blur-top')!.style.getPropertyValue('--edge-height') === '64px');
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
@@ -93,6 +94,23 @@ export async function runBrowserChecks(output: HTMLElement): Promise<void> {
     record('Reduced motion renders complete text with no word or counter animation', view.root.querySelector('#summary')!.textContent!.trim() === summaryText(result.levels, 2) && view.root.querySelector('.glass')!.getAnimations({ subtree: true }).length === 0);
     view.root.querySelector<HTMLInputElement>('#detail')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
     record('Keyboard End selects the longest preset', view.root.querySelector('#word-count-readable')!.textContent === countLabel(result.wordCounts[4]!));
+    view.destroy(); view = make(() => false);
+    const longLevels = [60, 140, 300, 550, 800].map(count => ({ runs: [{ text: Array.from({ length: count }, (_, i) => `detail${i}`).join(' '), emphasis: false }] }));
+    view.state({ status: 'ready', result: { requestId: crypto.randomUUID(), levels: longLevels, wordCounts: levelCounts(longLevels) } });
+    await pause(100);
+    const longInput = view.root.querySelector<HTMLInputElement>('#detail')!;
+    const longParagraph = view.root.querySelector<HTMLElement>('#summary')!;
+    longInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    const longAnimations = longParagraph.getAnimations({ subtree: true });
+    record('Article reveal stays bounded while retaining 500 ms word motion', longAnimations.length > 0 && longAnimations.every(a => Number(a.effect?.getComputedTiming().endTime) <= 3700));
+    for (const value of [0, 4, 1, 4]) { longInput.value = String(value); longInput.dispatchEvent(new Event('input', { bubbles: true })); await pause(35); }
+    await pause(3900);
+    record('800-word rapid reversals settle without stale text or animations', longParagraph.textContent?.trim() === summaryText(longLevels, 4) && !longParagraph.querySelector('.removing') && !longParagraph.getAnimations({ subtree: true }).length);
+    const longScroll = view.root.querySelector<HTMLElement>('#summary-scroll')!;
+    longScroll.scrollTop = longScroll.scrollHeight; await pause(80);
+    const longLast = longParagraph.querySelector<HTMLElement>('.word:last-of-type')!;
+    const longBand = parseFloat(view.root.querySelector<HTMLElement>('#summary-blur-bottom')!.style.getPropertyValue('--edge-height'));
+    record('800-word summaries scroll fully above the footer in the fixed tray', longLast.getBoundingClientRect().bottom <= longScroll.getBoundingClientRect().bottom - longBand - 7 && view.root.querySelector('#word-count-readable')!.textContent === countLabel(800));
   } catch (error) { record(`Browser check exception: ${error instanceof Error ? error.message : String(error)}`, false); }
   finally { view.destroy(); }
 }

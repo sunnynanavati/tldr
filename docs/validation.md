@@ -115,3 +115,53 @@ Restored `src/ui/reveal.ts` exactly to the previously approved implementation at
 The bottom tint keeps its 120% height but now uses a smooth multi-stop opacity ramp across the full band, with gentle slopes near transparent and maximum tint. The top tint remains absent; blur layers, blur heights, and scrolling clearance remain unchanged. The studio embeds the same updated implementation.
 
 Validation: type checking, lint, all 56 current unit/integration tests, and production builds passed. All 31 browser checks passed at 1280×800, including shortening, interrupted reversals, counter continuity, final-line clearance, and independent tint/blur heights. No browser console errors. The reveal source matches the earlier version exactly. No AI calls or backend restart were needed. These checks use the production dialog in the development harness; reload the installed extension and refresh the source page to use the rebuild.
+
+## 2026-10-14 — fixed highlight decisions and 40% footer tint
+
+Composition now preserves source-run identity. Highlight selection reserves all previously selected cues before considering newly appearing cues and locks earlier muted cues too. This prevents additions from displacing an existing highlight or promoting a previously muted phrase solely because the budget grew. The final presentation guards still apply. Regression tests cover the reported “flopped”/“succeeded commercially” pattern, newly competing high-priority cues, muted cues, and source identity across inserted details.
+
+Footer tint now spans 40% of the inner dialog height, updated on resize, using the existing eased opacity ramp. Its blur remains independently sized (20% at defaults). Studio uses the same CSS and corresponding geometry. Top tint remains absent.
+
+Validation: type check, lint, 65 tests, and production builds passed. All 31 browser checks passed, including the measured tint/blur ratio, scrolling clearance, and motion regressions; no console errors. Light and dark fixture pages were inspected. One live fixture request returned invalid generated output; a second provider request validated successfully with counts 11/23/44/63/98. These live checks do not guarantee that every model response will pass validation. Backend restarted with the new code. Native installed-extension context-menu flow was not repeated; reload the extension, refresh the page, and generate a new summary.
+
+## 2026-10-14 — expanded-highlight coverage and actual footer seam fix
+
+Reproduced a generated narrative where 32 added words carried only a malformed cue (“did not know of the”). The presentation guard discarded it but the result was still accepted with no new highlights. Added a coverage check for 12+ newly introduced words: new accepted cues must cover at least floor(12% of added words), minimum one, and at least one cue per 25 added words. Existing highlighted and muted source-run decisions remain fixed. A coverage failure triggers one corrective generation at most, within the original abort/deadline; it never publishes the sparse result. The second call can add latency and token cost. Tests cover sparse and malformed additions, successful correction, and the two-attempt cap.
+
+The footer seam was reproduced with the approved 40% tint height. Temporarily disabling the stacked backdrop filters removed it, identifying repeated glass-surface sampling as the source. A neutral `filter: opacity(1)` on the text viewport now establishes a backdrop root, keeping edge filters in the text plane. Blur layers remain enabled with the same strengths/heights, and the 40% eased tint remains. This follows the [CSS Filter Effects backdrop-root definition](https://github.com/w3c/csswg-drafts/blob/main/filter-effects-2/Overview.bs). Short and long screenshots confirm a continuous glass surface while text still blurs at the edge. The standalone studio embeds the same correction.
+
+Type checking, lint, all 69 unit/integration tests, and production builds passed. All 32 browser integration checks passed, including the isolated text plane, enabled filters, tint/blur dimensions, text scrolling clearance, and motion controls. No console errors. A live advice fixture produced counts 34/48/71/89/111 and grew from 3 to 4/6/7/8 visible cues while preserving earlier ones. A separate narrative fixture failed final summary-contract validation; arbitrary model outputs still may require Retry. This is not a blanket guarantee of semantic quality. The backend was restarted. Reload the installed extension, refresh the source page, and request a new summary to test the updates.
+
+
+## Adaptive article lengths — 2026-10-15
+
+- Five targets grow with the source: Detailed targets 25% of article words, capped at 800; the other caps are 60/140/300/550. Ordinary passages retain the existing baseline, short passages still get one summary. Tested monotonicity and strict increases over source lengths 40–40,000.
+- Expanded output/run/highlight budgets and prompt/schema guidance support long articles without removing shared highlight decisions. Initial reveal keeps its per-word motion but caps the arrival stagger window at 3.2 seconds.
+- Articles use authenticated POST/GET/DELETE `/v1/summary-jobs` exchanges. Work is memory-only, capped by concurrency/rate limits, a 90-second deadline, and a 30-second polling lease. The content controller polls through fresh worker messages and has a 95-second timeout. Cancellation works without relying on worker-global job state; abandoned work expires. Ordinary passage requests retain the existing synchronous endpoint and deadlines.
+- `npm run verify`: type checking, lint, all 79 tests, studio synchronization, and production builds passed. Added transport/server tests cover polling, stale IDs, auth, duplicate starts, result recovery/cleanup, explicit cancellation, orphan expiry, deadlines, and concurrency release.
+- Browser: all 35 checks passed; no console errors. The 800-word stress fixture verifies bounded arrival motion, rapid reversals, complete scrolling, and footer clearance. This is an in-app browser harness check, not a new native Chrome context-menu test.
+- Live synthetic report: 2,322 source words, targets 60/140/291/423/581. Final authenticated job produced 49/90/223/328/480 words, 4/6/11/16/23 highlighted phrases, in 13.1 seconds. The result was deleted after retrieval. Full non-private sample is in `adaptive-summary-smoke.json`.
+- The first prompt iteration still underfilled targets; explicit article budgets and multiple-parts-per-level guidance corrected that. Another direct-provider check produced 469 detailed words in 34.9 seconds, motivating the longer job path. One intermediate live backend attempt was rejected; model output remains variable and Retry may be necessary. No exact length or universal fidelity guarantee is claimed.
+- Surface values were inspected, not retuned: 95% #1e1e1e to 98% #111111, 1px backdrop blur; 64px header blur with no tint; 20%-height footer blur; independent 40%-height footer tint easing from transparent to 12% black. Eight edge-blur layers range from .5px to 12px. Reference screenshot: `screenshots/adaptive-material-baseline.png`.
+- Rebuilt `dist/extension` and `dist/tldr-chrome.zip`; restarted the configured loopback backend. Chrome must reload the extension and refresh existing source tabs to load the new contract and polling code.
+
+
+## Footer tint studio controls — 2026-10-15
+
+Added independent footer tint height and opacity controls (0–100%, defaults 40%/12%) with numeric inputs, keyboard sliders, individual reset, persistence, and settings export through the existing studio infrastructure. Existing experiments inherit the new defaults without losing their other adjustments. Shared CSS uses a normalized opacity curve, preserving the approved material at the defaults.
+
+Verified 65% height/30% opacity in the browser, persistence after reload, keyboard Home producing fully transparent tint, and both resets returning to 40%/12%. Footer blur stayed at 83.6px during these adjustments. No console errors. Type check, lint, all 79 tests, studio synchronization, and production builds passed. Screenshot: `screenshots/footer-tint-controls.png`.
+
+
+## Approved production footer tint — 2026-10-15
+
+Promoted the screenshot values into the shared production preset: footer tint height 100%, opacity 50%. Updated the UI specification and studio reset baseline. Blur geometry and text clearance are unchanged. Also removed an unintended link between footer tint opacity and the card’s outer one-pixel shadow; that shadow retains its original 12% opacity. Type checking, lint, all 79 tests, and production builds passed. Rebuilt the unpacked extension and ZIP.
+
+
+## Persistent local backend — 2026-10-17
+
+The reported connection error was reproduced as no listener on 127.0.0.1:4317, with no TLDR launch agent installed. Replaced reliance on a temporary development process with the per-user `com.tldr.backend` launch agent. It starts at login and uses KeepAlive with a 10-second restart throttle. The installer bundles the server and dependencies and copies Node 24 into private Application Support storage, outside the Documents checkout. The installed environment is 0600; the service directory is 0700; the plist contains paths, not credentials. The endpoint remains loopback-only with existing authentication.
+
+Validation: authenticated health ready; listener confirmed on 127.0.0.1 only; plist validated by plutil. Sent SIGTERM through launchctl to the named service: PID 63022 was automatically replaced by 63538, and authenticated health returned ready again. A real request using an original short fixture returned HTTP 200 with one 25-word summary. Type checking, lint, and all 79 existing tests passed. No extension update or Chrome reload is necessary for this startup fix. Actual logout/reboot was not performed.
+
+Added `service:install`, `service:restart`, `service:status`, and `service:uninstall`; documented the private environment snapshot and requirement to reinstall/restart after backend code or project .env changes. No user article text or credentials were printed in validation output.

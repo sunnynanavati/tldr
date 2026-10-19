@@ -23,6 +23,49 @@ describe('local backend', () => {
     const response = await app.inject({ method: 'OPTIONS', url: '/v1/summaries', headers: { origin: headers.origin } });
     expect(response.statusCode).toBe(204); expect(response.headers['access-control-allow-origin']).toBe(headers.origin);
   });
+  it('runs bounded jobs with resumable polling and explicit result cleanup', async () => {
+    let finish!: (value: { levels: typeof fixtureLevels }) => void;
+    const app = setup({ summarize: () => new Promise(resolve => { finish = resolve; }) });
+    const input = payload(), url = `/v1/summary-jobs/${input.requestId}`;
+    const start = await app.inject({ method: 'POST', url: '/v1/summary-jobs', headers, payload: input });
+    expect(start.statusCode).toBe(202); expect(start.json()).toEqual({ pending: true, requestId: input.requestId });
+    expect((await app.inject({ url, headers })).statusCode).toBe(202);
+    expect((await app.inject({ method: 'POST', url: '/v1/summary-jobs', headers, payload: input })).statusCode).toBe(409);
+    finish({ levels: fixtureLevels }); await new Promise(resolve => setTimeout(resolve, 0));
+    for (let i = 0; i < 2; i++) expect((await app.inject({ url, headers })).json()).toMatchObject({ ok: true, result: { requestId: input.requestId } });
+    expect((await app.inject({ method: 'DELETE', url, headers })).statusCode).toBe(204);
+    expect((await app.inject({ url, headers })).statusCode).toBe(404);
+  });
+  it('authenticates job creation, polling, and cancellation', async () => {
+    const app = setup(), input = payload();
+    for (const method of ['POST', 'GET', 'DELETE'] as const) {
+      const url = method === 'POST' ? '/v1/summary-jobs' : `/v1/summary-jobs/${input.requestId}`;
+      expect((await app.inject({ method, url, headers: { origin: headers.origin } })).statusCode).toBe(401);
+      expect((await app.inject({ method, url, headers: { ...headers, origin: 'https://example.com' } })).statusCode).toBe(403);
+    }
+  });
+  it('cancels abandoned jobs and releases their concurrency slot', async () => {
+    let signal: AbortSignal | undefined;
+    const app = setup({ summarize: async (_request, incoming) => { signal = incoming; return new Promise(() => {}); } }, { jobLeaseMs: 10, concurrency: 1 });
+    const input = payload();
+    await app.inject({ method: 'POST', url: '/v1/summary-jobs', headers, payload: input });
+    await new Promise(resolve => setTimeout(resolve, 35));
+    expect(signal?.aborted).toBe(true);
+    expect((await app.inject({ url: `/v1/summary-jobs/${input.requestId}`, headers })).statusCode).toBe(404);
+    expect((await app.inject({ method: 'POST', url: '/v1/summary-jobs', headers, payload: payload() })).statusCode).toBe(202);
+  });
+  it('aborts jobs on DELETE and returns safe errors after their deadline', async () => {
+    let signal: AbortSignal | undefined;
+    const app = setup({ summarize: async (_request, incoming) => { signal = incoming; return new Promise(() => {}); } }, { deadlineMs: 20 });
+    const first = payload();
+    await app.inject({ method: 'POST', url: '/v1/summary-jobs', headers, payload: first });
+    await app.inject({ method: 'DELETE', url: `/v1/summary-jobs/${first.requestId}`, headers });
+    expect(signal?.aborted).toBe(true);
+    const second = payload();
+    await app.inject({ method: 'POST', url: '/v1/summary-jobs', headers, payload: second });
+    await new Promise(resolve => setTimeout(resolve, 35));
+    expect((await app.inject({ url: `/v1/summary-jobs/${second.requestId}`, headers })).json()).toMatchObject({ ok: false, error: { code: 'timeout' } });
+  });
   it('returns complete-level counts and reflects only the matching request ID', async () => {
     const app = setup(), input = payload();
     const response = await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: input });

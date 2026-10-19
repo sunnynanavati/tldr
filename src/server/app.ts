@@ -1,12 +1,13 @@
 import { timingSafeEqual } from 'node:crypto';
 import Fastify from 'fastify';
-import { SummaryRequestSchema, validateSummary, wordCount, MAX_INPUT_CHARS } from '../shared/summary';
+import { SummaryRequestSchema, validateSummary, wordCount, MAX_INPUT_CHARS, type SummaryRequest } from '../shared/summary';
+import { type SummaryReply } from '../shared/protocol';
 import { ServiceError, serviceError } from './errors';
 import type { SummaryProvider } from './provider';
 
 export interface ServerConfig {
   token: string; extensionId: string; provider: SummaryProvider | null;
-  deadlineMs?: number; rateLimit?: number; concurrency?: number;
+  deadlineMs?: number; jobLeaseMs?: number; rateLimit?: number; concurrency?: number;
 }
 export function createApp(config: ServerConfig) {
   const app = Fastify({ logger: false, bodyLimit: MAX_INPUT_CHARS * 4 + 1024 });
@@ -24,7 +25,7 @@ export function createApp(config: ServerConfig) {
     reply.header('Access-Control-Allow-Origin', origin);
     reply.header('Vary', 'Origin');
     if (request.method === 'OPTIONS') {
-      reply.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      reply.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
       reply.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-TLDR-Extension-Id');
       return reply.code(204).send();
     }
@@ -41,8 +42,8 @@ export function createApp(config: ServerConfig) {
     return reply.code(failure.status).send({ error: failure.detail });
   });
   app.get('/health', async () => ({ ready: Boolean(config.provider) }));
-  app.post('/v1/summaries', async (request, reply) => {
-    const parsed = SummaryRequestSchema.safeParse(request.body);
+  function admit(body: unknown): { input: SummaryRequest; controller: AbortController } {
+    const parsed = SummaryRequestSchema.safeParse(body);
     if (!parsed.success) throw serviceError(400, 'selection', 'Select a passage of up to 40,000 characters.', false);
     const input = parsed.data;
     if (wordCount(input.text) < 4) throw serviceError(422, 'too_short', 'Select a complete sentence or a longer passage.', false);
@@ -55,18 +56,24 @@ export function createApp(config: ServerConfig) {
     attempts.push(now);
     const controller = new AbortController();
     requests.set(input.requestId, controller);
+    return { input, controller };
+  }
+  async function generate(input: SummaryRequest, controller: AbortController, duration = 20_000) {
     let deadlineExpired = false;
-    const onClose = () => { if (!reply.raw.writableEnded) controller.abort(); };
-    reply.raw.on('close', onClose);
+    let onAbort!: () => void;
+    const cancelled = new Promise<never>((_, reject) => {
+      onAbort = () => reject(serviceError(499, 'cancelled', 'Summary cancelled.', false));
+      controller.signal.addEventListener('abort', onAbort, { once: true });
+    });
     let timeout: ReturnType<typeof setTimeout>;
     const deadline = new Promise<never>((_, reject) => {
       timeout = setTimeout(() => {
         deadlineExpired = true; controller.abort();
         reject(serviceError(504, 'timeout', 'The summary took too long. Try again.'));
-      }, config.deadlineMs ?? 20_000);
+      }, config.deadlineMs ?? duration);
     });
     try {
-      const model = await Promise.race([config.provider.summarize(input, controller.signal), deadline]);
+      const model = await Promise.race([config.provider!.summarize(input, controller.signal), deadline, cancelled]);
       if (controller.signal.aborted) throw serviceError(499, 'cancelled', 'Summary cancelled.', false);
       if (model.levels.length === 0) throw serviceError(422, 'already_concise', 'This selection is already concise. Try selecting a longer passage.', false);
       try { return validateSummary(input, model); }
@@ -77,11 +84,58 @@ export function createApp(config: ServerConfig) {
       const status = (error as { status?: number }).status;
       if (status === 401 || status === 403) throw serviceError(503, 'api_key', 'Check the OpenAI API key and access in your backend settings.', false);
       if (status === 429) throw serviceError(429, 'provider_limit', 'OpenAI is at its usage limit. Check API billing or try again later.');
-      throw serviceError(502, 'provider', 'Could not reach the summary service. Try again.');
+      throw serviceError(502, 'provider', 'The summary could not be prepared. Try again.');
     } finally {
-      clearTimeout(timeout!); reply.raw.off('close', onClose); requests.delete(input.requestId);
+      clearTimeout(timeout!); controller.signal.removeEventListener('abort', onAbort); requests.delete(input.requestId);
     }
+  }
+  app.post('/v1/summaries', async (request, reply) => {
+    const { input, controller } = admit(request.body);
+    const onClose = () => { if (!reply.raw.writableEnded) controller.abort(); };
+    reply.raw.on('close', onClose);
+    try { return await generate(input, controller); }
+    finally { reply.raw.off('close', onClose); }
   });
-  app.addHook('onClose', async () => { for (const controller of requests.values()) controller.abort(); });
+
+  // Long articles use short HTTP exchanges. A polling lease bounds orphaned work
+  // if the tab disappears or Chrome restarts the worker between requests.
+  type Job = { controller: AbortController; touched: number; reply?: SummaryReply };
+  const jobs = new Map<string, Job>();
+  const lease = config.jobLeaseMs ?? 30_000;
+  const reap = setInterval(() => {
+    for (const [id, job] of jobs) if (Date.now() - job.touched > lease) {
+      job.controller.abort(); jobs.delete(id);
+    }
+  }, Math.min(1000, lease));
+  reap.unref();
+  app.post('/v1/summary-jobs', async (request, reply) => {
+    if (jobs.size >= 20) throw serviceError(429, 'busy', 'TLDR is finishing another summary. Try again in a moment.');
+    const parsed = SummaryRequestSchema.safeParse(request.body);
+    if (parsed.success && jobs.has(parsed.data.requestId)) throw serviceError(409, 'duplicate', 'This summary is already being prepared.');
+    const { input, controller } = admit(request.body);
+    const job: Job = { controller, touched: Date.now() }; jobs.set(input.requestId, job);
+    void generate(input, controller, 90_000).then(result => {
+      if (jobs.get(input.requestId) === job) job.reply = { ok: true, result };
+    }, error => {
+      if (jobs.get(input.requestId) === job) job.reply = { ok: false, error: error instanceof ServiceError ? error.detail : { code: 'provider', message: 'The summary could not be prepared. Try again.', retryable: true } };
+    });
+    return reply.code(202).send({ pending: true, requestId: input.requestId });
+  });
+  app.get<{ Params: { id: string } }>('/v1/summary-jobs/:id', async (request, reply) => {
+    const job = jobs.get(request.params.id);
+    if (!job) throw serviceError(404, 'expired', 'The summary session expired. Try again.');
+    job.touched = Date.now();
+    if (!job.reply) return reply.code(202).send({ pending: true, requestId: request.params.id });
+    // Keep the result until acknowledged by DELETE, allowing a lost poll to retry.
+    return job.reply;
+  });
+  app.delete<{ Params: { id: string } }>('/v1/summary-jobs/:id', async (request, reply) => {
+    jobs.get(request.params.id)?.controller.abort(); jobs.delete(request.params.id);
+    return reply.code(204).send();
+  });
+  app.addHook('onClose', async () => {
+    clearInterval(reap); jobs.clear();
+    for (const controller of requests.values()) controller.abort();
+  });
   return app;
 }

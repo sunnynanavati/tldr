@@ -4,7 +4,7 @@ export const MAX_INPUT_CHARS = 40_000;
 export const SHORT_PASSAGE_WORDS = 40;
 export const levelNames = ['Essential', 'Concise', 'Balanced', 'Expanded', 'Detailed'] as const;
 export const RunSchema = z.object({ text: z.string().min(1).max(4000), emphasis: z.boolean() }).strict();
-export const LevelSchema = z.object({ runs: z.array(RunSchema).min(1).max(80) }).strict();
+export const LevelSchema = z.object({ runs: z.array(RunSchema).min(1).max(320) }).strict();
 // Empty provider output is a deliberate "already concise" signal, never a successful API response.
 export const ModelSummarySchema = z.object({ levels: z.array(LevelSchema).max(5) }).strict();
 export function modelSummarySchema(sourceWords: number) {
@@ -48,8 +48,10 @@ export const levelCounts = (levels: SummaryLevel[]): number[] =>
   levels.map((_, i) => wordCount(summaryText(levels, i)));
 export function lengthTargets(sourceWords: number): number[] {
   if (sourceWords < SHORT_PASSAGE_WORDS) return [Math.max(1, Math.floor(sourceWords * 0.55))];
-  const ratio = Math.min(1, Math.floor(sourceWords * 0.72) / 110);
-  return [20, 35, 55, 80, 110].map(target => Math.round(target * ratio));
+  // Keep familiar targets for passages; grow article detail without losing a quick takeaway.
+  const longest = Math.min(Math.floor(sourceWords * .72), Math.max(110, Math.round(sourceWords * .25)), 800);
+  const caps = [60, 140, 300, 550, 800];
+  return [20, 35, 55, 80, 110].map((target, index) => Math.min(caps[index]!, Math.round(target / 110 * longest)));
 }
 export function validateSummary(request: SummaryRequest, model: ModelSummary): SummaryResult {
   const sourceWords = wordCount(request.text);
@@ -62,6 +64,10 @@ export function validateSummary(request: SummaryRequest, model: ModelSummary): S
   }
   return result;
 }
+
+// Very short summaries still need room for one complete short semantic cue.
+export const highlightBudget = (words: number): number => Math.max(6, Math.ceil(words * .35));
+export const highlightPhraseLimit = (words: number): number => Math.max(10, Math.ceil(words / 12));
 
 // Presentation guard: never let a provider turn whole sentences into highlights.
 export function restrainEmphasis(level: SummaryLevel): SummaryLevel {
@@ -79,11 +85,12 @@ export function restrainEmphasis(level: SummaryLevel): SummaryLevel {
     return words.length > 0 && words.every(word => ranges.some(range => range.emphasis
       && range.start <= sentence.index + word.index && range.end >= sentence.index + word.index + word.segment.length));
   });
-  let budget = Math.max(1, Math.ceil(wordCount(text) * .28)), phrases = 0;
+  const words = wordCount(text), phraseLimit = highlightPhraseLimit(words);
+  let budget = highlightBudget(words), phrases = 0;
   return { runs: merged.map((run, index) => {
     const count = wordCount(run.text);
-    const emphasis = run.emphasis && count > 0 && count <= 4 && count <= budget
-      && phrases < 10 && !/[.!?。！？]/u.test(run.text)
+    const emphasis = run.emphasis && count > 0 && count <= 6 && count <= budget
+      && phrases < phraseLimit && !/[.!?。！？]/u.test(run.text.replace(/(?<=\p{N})[.,](?=\p{N})/gu, ''))
       && !wholeSentences.some(sentence => ranges[index]!.start < sentence.index + sentence.segment.length && ranges[index]!.end > sentence.index);
     if (emphasis) { budget -= count; phrases++; }
     return { text: run.text, emphasis };

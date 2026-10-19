@@ -71,7 +71,8 @@ export class SummaryReveal {
     }
     const reveal = (entries: Entry[], exiting: boolean) => {
       const duration = !exiting ? settings.duration : Math.min(settings.duration, 180);
-      const stagger = !exiting ? settings.stagger : Math.min(settings.stagger, 60 / Math.max(1, entries.length - 1));
+      // Preserve the tuned word motion without making an article-length reveal take tens of seconds.
+      const stagger = Math.min(settings.stagger, (exiting ? 60 : 3200) / Math.max(1, entries.length - 1));
       const hidden = { opacity: '0', transform: 'translateY(5px)', filter: `blur(${settings.textBlur}px)` };
       const visible = { opacity: '1', transform: 'translateY(0)', filter: 'blur(0px)' };
       (exiting ? [...entries].reverse() : entries).forEach((entry, index) => {

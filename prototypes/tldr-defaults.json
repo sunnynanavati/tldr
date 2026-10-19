@@ -34,5 +34,7 @@
   "progressiveScrollAware": true,
   "progressiveHeight": 20,
   "counterBlur": 1.5,
-  "counterRoll": 720
+  "counterRoll": 720,
+  "footerTintHeight": 100,
+  "footerTintOpacity": 50
 }

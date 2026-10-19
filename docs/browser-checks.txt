@@ -18,7 +18,8 @@ PASS · Counter settles crisp and in its default color
 PASS · Pointer travel stays continuous
 PASS · Release snaps to the nearest preset
 PASS · Last line clears the footer fade
-PASS · Top band has no tint; bottom tint is 20% taller than unchanged blur
+PASS · Top band has no tint; bottom tint covers the full dialog at 50% opacity independently of blur
+PASS · Edge blur samples an isolated text plane and stays enabled
 PASS · Scrolling reveals the independent 64 px header blur
 PASS · Escape, outside click, and page scrolling leave the tray open
 PASS · Keyboard movement moves the tray without changing its size
@@ -29,3 +30,6 @@ PASS · Viewport updates retain manually adjusted geometry
 PASS · Close removes the tray
 PASS · Reduced motion renders complete text with no word or counter animation
 PASS · Keyboard End selects the longest preset
+PASS · Article reveal stays bounded while retaining 500 ms word motion
+PASS · 800-word rapid reversals settle without stale text or animations
+PASS · 800-word summaries scroll fully above the footer in the fixed tray

@@ -1,0 +1,528 @@
+{
+  "transport": "authenticated background job",
+  "sourceWords": 2322,
+  "targets": [
+    60,
+    140,
+    291,
+    423,
+    581
+  ],
+  "actualWords": [
+    49,
+    90,
+    223,
+    328,
+    480
+  ],
+  "highlightPhrases": [
+    4,
+    6,
+    11,
+    16,
+    23
+  ],
+  "seconds": 13.1,
+  "levels": [
+    {
+      "runs": [
+        {
+          "text": "The city council",
+          "emphasis": true
+        },
+        {
+          "text": " has ",
+          "emphasis": false
+        },
+        {
+          "text": "approved coordinated planning",
+          "emphasis": true
+        },
+        {
+          "text": ", not guaranteed construction or completion dates. ",
+          "emphasis": false
+        },
+        {
+          "text": "Quarterly reports",
+          "emphasis": true
+        },
+        {
+          "text": " will be published by an independent committee, and residents can inspect budgets and ask questions at public meetings. ",
+          "emphasis": false
+        },
+        {
+          "text": "The programme prioritizes repairs",
+          "emphasis": true
+        },
+        {
+          "text": " and improved access to existing assets rather than a new civic headquarters.",
+          "emphasis": false
+        }
+      ]
+    },
+    {
+      "runs": [
+        {
+          "text": "The city council",
+          "emphasis": true
+        },
+        {
+          "text": " has ",
+          "emphasis": false
+        },
+        {
+          "text": "approved coordinated planning",
+          "emphasis": true
+        },
+        {
+          "text": ", not guaranteed construction or completion dates. ",
+          "emphasis": false
+        },
+        {
+          "text": "Quarterly reports",
+          "emphasis": true
+        },
+        {
+          "text": " will be published by an independent committee, and residents can inspect budgets and ask questions at public meetings. ",
+          "emphasis": false
+        },
+        {
+          "text": "The programme prioritizes repairs",
+          "emphasis": true
+        },
+        {
+          "text": " and improved access to existing assets rather than a new civic headquarters. ",
+          "emphasis": false
+        },
+        {
+          "text": "Each project has a provisional",
+          "emphasis": true
+        },
+        {
+          "text": " target month; completion depends on a stated condition that the council has not confirmed as met. ",
+          "emphasis": false
+        },
+        {
+          "text": "Departments must report",
+          "emphasis": true
+        },
+        {
+          "text": " delays and scope changes at the next quarterly meeting; residents should check notices before relying on schedules.",
+          "emphasis": false
+        }
+      ]
+    },
+    {
+      "runs": [
+        {
+          "text": "The city council",
+          "emphasis": true
+        },
+        {
+          "text": ", through a 16-project renewal programme, has ",
+          "emphasis": false
+        },
+        {
+          "text": "approved coordinated planning",
+          "emphasis": true
+        },
+        {
+          "text": ", not guaranteed construction or completion dates. ",
+          "emphasis": false
+        },
+        {
+          "text": "Quarterly reports",
+          "emphasis": true
+        },
+        {
+          "text": " will be published by an independent committee, and residents can inspect budgets and ask questions at public meetings. ",
+          "emphasis": false
+        },
+        {
+          "text": "The programme prioritizes repairs",
+          "emphasis": true
+        },
+        {
+          "text": " and improved access to existing assets rather than a new civic headquarters. ",
+          "emphasis": false
+        },
+        {
+          "text": "Each project has a provisional",
+          "emphasis": true
+        },
+        {
+          "text": " target month; completion depends on a stated condition that the council has not confirmed as met. ",
+          "emphasis": false
+        },
+        {
+          "text": "Departments must report",
+          "emphasis": true
+        },
+        {
+          "text": " delays and scope changes at the next quarterly meeting; residents should check notices before relying on schedules. ",
+          "emphasis": false
+        },
+        {
+          "text": "Success is measured by completed",
+          "emphasis": true
+        },
+        {
+          "text": " work and service access, not expenditure alone; no final operating-savings estimates are approved. ",
+          "emphasis": false
+        },
+        {
+          "text": "Riverside bridge",
+          "emphasis": true
+        },
+        {
+          "text": " is intended to have cracked supports reinforced for a proposed $12 million, with December as its provisional target. The bridge is to stay open during work; independent structural inspection is a prerequisite, not a confirmed completed step. ",
+          "emphasis": false
+        },
+        {
+          "text": "North library",
+          "emphasis": true
+        },
+        {
+          "text": " is planned to gain evening hours with six additional librarians by September, subject to recruitment and training; weekend hours remain unchanged during work. ",
+          "emphasis": false
+        },
+        {
+          "text": "East bus corridor",
+          "emphasis": true
+        },
+        {
+          "text": " proposes four kilometres of dedicated bus lanes by November, pending traffic-signal testing; emergency vehicles retain access during construction. ",
+          "emphasis": false
+        },
+        {
+          "text": "Harbor flood barrier",
+          "emphasis": true
+        },
+        {
+          "text": " proposes replacing eight worn gate mechanisms by October, subject to coastal permits; temporary barriers will protect the work area.",
+          "emphasis": false
+        }
+      ]
+    },
+    {
+      "runs": [
+        {
+          "text": "The city council",
+          "emphasis": true
+        },
+        {
+          "text": ", through a 16-project renewal programme, has ",
+          "emphasis": false
+        },
+        {
+          "text": "approved coordinated planning",
+          "emphasis": true
+        },
+        {
+          "text": ", not guaranteed construction or completion dates. ",
+          "emphasis": false
+        },
+        {
+          "text": "Quarterly reports",
+          "emphasis": true
+        },
+        {
+          "text": " will be published by an independent committee, and residents can inspect budgets and ask questions at public meetings. ",
+          "emphasis": false
+        },
+        {
+          "text": "The programme prioritizes repairs",
+          "emphasis": true
+        },
+        {
+          "text": " and improved access to existing assets rather than a new civic headquarters. ",
+          "emphasis": false
+        },
+        {
+          "text": "Each project has a provisional",
+          "emphasis": true
+        },
+        {
+          "text": " target month; completion depends on a stated condition that the council has not confirmed as met. ",
+          "emphasis": false
+        },
+        {
+          "text": "Departments must report",
+          "emphasis": true
+        },
+        {
+          "text": " delays and scope changes at the next quarterly meeting; residents should check notices before relying on schedules. ",
+          "emphasis": false
+        },
+        {
+          "text": "Success is measured by completed",
+          "emphasis": true
+        },
+        {
+          "text": " work and service access, not expenditure alone; no final operating-savings estimates are approved. ",
+          "emphasis": false
+        },
+        {
+          "text": "Riverside bridge",
+          "emphasis": true
+        },
+        {
+          "text": " is intended to have cracked supports reinforced for a proposed $12 million, with December as its provisional target. The bridge is to stay open during work; independent structural inspection is a prerequisite, not a confirmed completed step. ",
+          "emphasis": false
+        },
+        {
+          "text": "North library",
+          "emphasis": true
+        },
+        {
+          "text": " is planned to gain evening hours with six additional librarians by September, subject to recruitment and training; weekend hours remain unchanged during work. ",
+          "emphasis": false
+        },
+        {
+          "text": "East bus corridor",
+          "emphasis": true
+        },
+        {
+          "text": " proposes four kilometres of dedicated bus lanes by November, pending traffic-signal testing; emergency vehicles retain access during construction. ",
+          "emphasis": false
+        },
+        {
+          "text": "Harbor flood barrier",
+          "emphasis": true
+        },
+        {
+          "text": " proposes replacing eight worn gate mechanisms by October, subject to coastal permits; temporary barriers will protect the work area. ",
+          "emphasis": false
+        },
+        {
+          "text": "West school kitchens",
+          "emphasis": true
+        },
+        {
+          "text": " plans to replace equipment in nine kitchens by August, pending electrical safety certification; temporary catering continues during installation. ",
+          "emphasis": false
+        },
+        {
+          "text": "Central water system",
+          "emphasis": true
+        },
+        {
+          "text": " plans repairs to eighteen kilometres of leaking pipes by January, conditional on water-quality testing; households will receive advance outage notices. ",
+          "emphasis": false
+        },
+        {
+          "text": "Hilltop park",
+          "emphasis": true
+        },
+        {
+          "text": " proposes three kilometres of accessible walking paths by April, subject to a resident accessibility review; mature trees will be preserved. ",
+          "emphasis": false
+        },
+        {
+          "text": "South recycling depot",
+          "emphasis": true
+        },
+        {
+          "text": " plans two sorting lines by March, dependent on equipment delivery; existing collection schedules continue during work. ",
+          "emphasis": false
+        },
+        {
+          "text": "Lakeside clinic",
+          "emphasis": true
+        },
+        {
+          "text": " proposes five community consultation rooms by February, pending staffing agreements; emergency care remains at the regional hospital.",
+          "emphasis": false
+        }
+      ]
+    },
+    {
+      "runs": [
+        {
+          "text": "The city council",
+          "emphasis": true
+        },
+        {
+          "text": ", through a 16-project renewal programme, has ",
+          "emphasis": false
+        },
+        {
+          "text": "approved coordinated planning",
+          "emphasis": true
+        },
+        {
+          "text": ", not guaranteed construction or completion dates. ",
+          "emphasis": false
+        },
+        {
+          "text": "Quarterly reports",
+          "emphasis": true
+        },
+        {
+          "text": " will be published by an independent committee, and residents can inspect budgets and ask questions at public meetings. ",
+          "emphasis": false
+        },
+        {
+          "text": "The programme prioritizes repairs",
+          "emphasis": true
+        },
+        {
+          "text": " and improved access to existing assets rather than a new civic headquarters. ",
+          "emphasis": false
+        },
+        {
+          "text": "Each project has a provisional",
+          "emphasis": true
+        },
+        {
+          "text": " target month; completion depends on a stated condition that the council has not confirmed as met. ",
+          "emphasis": false
+        },
+        {
+          "text": "Departments must report",
+          "emphasis": true
+        },
+        {
+          "text": " delays and scope changes at the next quarterly meeting; residents should check notices before relying on schedules. ",
+          "emphasis": false
+        },
+        {
+          "text": "Success is measured by completed",
+          "emphasis": true
+        },
+        {
+          "text": " work and service access, not expenditure alone; no final operating-savings estimates are approved. ",
+          "emphasis": false
+        },
+        {
+          "text": "Riverside bridge",
+          "emphasis": true
+        },
+        {
+          "text": " is intended to have cracked supports reinforced for a proposed $12 million, with December as its provisional target. The bridge is to stay open during work; independent structural inspection is a prerequisite, not a confirmed completed step. ",
+          "emphasis": false
+        },
+        {
+          "text": "North library",
+          "emphasis": true
+        },
+        {
+          "text": " is planned to gain evening hours with six additional librarians by September, subject to recruitment and training; weekend hours remain unchanged during work. ",
+          "emphasis": false
+        },
+        {
+          "text": "East bus corridor",
+          "emphasis": true
+        },
+        {
+          "text": " proposes four kilometres of dedicated bus lanes by November, pending traffic-signal testing; emergency vehicles retain access during construction. ",
+          "emphasis": false
+        },
+        {
+          "text": "Harbor flood barrier",
+          "emphasis": true
+        },
+        {
+          "text": " proposes replacing eight worn gate mechanisms by October, subject to coastal permits; temporary barriers will protect the work area. ",
+          "emphasis": false
+        },
+        {
+          "text": "West school kitchens",
+          "emphasis": true
+        },
+        {
+          "text": " plans to replace equipment in nine kitchens by August, pending electrical safety certification; temporary catering continues during installation. ",
+          "emphasis": false
+        },
+        {
+          "text": "Central water system",
+          "emphasis": true
+        },
+        {
+          "text": " plans repairs to eighteen kilometres of leaking pipes by January, conditional on water-quality testing; households will receive advance outage notices. ",
+          "emphasis": false
+        },
+        {
+          "text": "Hilltop park",
+          "emphasis": true
+        },
+        {
+          "text": " proposes three kilometres of accessible walking paths by April, subject to a resident accessibility review; mature trees will be preserved. ",
+          "emphasis": false
+        },
+        {
+          "text": "South recycling depot",
+          "emphasis": true
+        },
+        {
+          "text": " plans two sorting lines by March, dependent on equipment delivery; existing collection schedules continue during work. ",
+          "emphasis": false
+        },
+        {
+          "text": "Lakeside clinic",
+          "emphasis": true
+        },
+        {
+          "text": " proposes five community consultation rooms by February, pending staffing agreements; emergency care remains at the regional hospital. ",
+          "emphasis": false
+        },
+        {
+          "text": "Old town housing",
+          "emphasis": true
+        },
+        {
+          "text": " plans insulation for 200 council-owned apartments by May, dependent on tenant scheduling agreements; residents will not have to move out. ",
+          "emphasis": false
+        },
+        {
+          "text": "Market square",
+          "emphasis": true
+        },
+        {
+          "text": " plans drainage improvements and forty new lights by June, subject to utility surveys; traders will receive temporary alternative pitches. ",
+          "emphasis": false
+        },
+        {
+          "text": "Station bicycle hub",
+          "emphasis": true
+        },
+        {
+          "text": " proposes 300 secure bicycle spaces by July, pending rail-operator permission; pedestrian routes stay open during construction. ",
+          "emphasis": false
+        },
+        {
+          "text": "Valley sports centre",
+          "emphasis": true
+        },
+        {
+          "text": " plans a replacement roof for one indoor sports hall by October, conditional on final contractor selection; outdoor facilities remain available. ",
+          "emphasis": false
+        },
+        {
+          "text": "Museum archive",
+          "emphasis": true
+        },
+        {
+          "text": " proposes humidity-control upgrades in four rooms by November, pending conservation-specialist approval; fragile objects will move to temporary storage. ",
+          "emphasis": false
+        },
+        {
+          "text": "Community garden network",
+          "emphasis": true
+        },
+        {
+          "text": " plans twenty rainwater tanks by March, dependent on ground-stability checks; allotment holders retain access to their plots. ",
+          "emphasis": false
+        },
+        {
+          "text": "Civic records office",
+          "emphasis": true
+        },
+        {
+          "text": " proposes digitizing 50,000 planning records by December, subject to privacy and accuracy checks; paper originals will be retained.",
+          "emphasis": false
+        }
+      ]
+    }
+  ]
+}

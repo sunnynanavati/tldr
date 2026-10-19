@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SummaryRequestSchema, SummaryResponseSchema, levelCounts, lengthTargets, modelSummarySchema, summaryText, validateSummary, wordCount } from '../src/shared/summary';
+import { SummaryRequestSchema, SummaryResponseSchema, levelCounts, lengthTargets, modelSummarySchema, restrainEmphasis, summaryText, validateSummary, wordCount } from '../src/shared/summary';
 import { fixtureSource, fixtureLevels, shortSource, shortLevels, chineseSource, chineseLevels } from '../src/dev/fixtures';
 
 describe('summary contract', () => {
@@ -19,6 +19,28 @@ describe('summary contract', () => {
     expect(lengthTargets(40).at(-1)).toBeLessThan(40);
     expect(lengthTargets(39)).toHaveLength(1);
     expect(validateSummary({ requestId: crypto.randomUUID(), text: shortSource }, { levels: shortLevels }).levels).toHaveLength(1);
+  });
+  it('grows article detail while keeping the essential summary quick', () => {
+    expect(lengthTargets(1000)).toEqual([45, 80, 125, 182, 250]);
+    expect(lengthTargets(3000)).toEqual([60, 140, 300, 545, 750]);
+    expect(lengthTargets(10000)).toEqual([60, 140, 300, 550, 800]);
+    let previous = [0, 0, 0, 0, 0];
+    for (let source = 40; source <= 40000; source++) {
+      const targets = lengthTargets(source);
+      expect(targets.every((count, i) => count >= previous[i]! && (i === 0 || count > targets[i - 1]!))).toBe(true);
+      expect(targets.at(-1)!).toBeLessThan(source);
+      previous = targets;
+    }
+  });
+  it('allows distributed highlights throughout article-length summaries', () => {
+    const levels = [60, 140, 300, 550, 800].map(count => ({ runs: Array.from({ length: count / 10 }, (_, i) => [
+      { text: `Finding ${i}`, emphasis: true },
+      { text: ' adds evidence while preserving uncertainty about later outcomes. ', emphasis: false },
+    ]).flat() }));
+    const guarded = restrainEmphasis(levels[4]!);
+    expect(guarded.runs.filter(run => run.emphasis).length).toBeGreaterThan(50);
+    expect(restrainEmphasis(guarded).runs.filter(run => run.emphasis)).toEqual(guarded.runs.filter(run => run.emphasis));
+    expect(SummaryResponseSchema.safeParse({ requestId: crypto.randomUUID(), levels, wordCounts: levelCounts(levels) }).success).toBe(true);
   });
   it('constrains provider output to the requested number of levels or already-concise output', () => {
     const long = modelSummarySchema(wordCount(fixtureSource));

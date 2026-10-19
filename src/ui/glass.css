@@ -35,7 +35,9 @@
 .summary-region{height:100%}
 /* The scroller covers the entire glass. Its padding sets the initial reading
    position; it is not a clipping boundary beneath the fixed controls. */
-.summary-viewport{position:absolute;inset:0}
+/* A neutral filter creates a backdrop root: edge blur samples the text plane,
+   not the already-tinted glass surface repeatedly. */
+.summary-viewport{position:absolute;inset:0;filter:opacity(1)}
 .summary-scroll{height:100%;padding:calc(var(--padding) + 48px) var(--padding) var(--scroll-end-padding,80px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;scroll-padding:calc(var(--padding) + 48px) 0 var(--scroll-end-padding,80px);-webkit-mask-image:var(--scroll-edge-mask,none);mask-image:var(--scroll-edge-mask,none)}
 .summary-scroll::-webkit-scrollbar{display:none}
 .summary-scroll:focus-visible{outline-offset:-4px}
@@ -44,9 +46,9 @@
 .summary-edge-blur[data-edge=bottom]{bottom:0;--blur-direction:to bottom}
 .summary-edge-layer{position:absolute;inset:0;pointer-events:none;opacity:var(--edge-visibility,1);-webkit-backdrop-filter:blur(var(--layer-blur));backdrop-filter:blur(var(--layer-blur));-webkit-mask-image:var(--layer-mask);mask-image:var(--layer-mask)}
 /* Smooth opacity ramp across the entire tint band, with gentle slopes at both ends. */
-.summary-edge-blur::after{content:"";position:absolute;inset:0;background:linear-gradient(var(--blur-direction),rgb(0 0 0 / 0) 0%,rgb(0 0 0 / .003) 10%,rgb(0 0 0 / .0125) 20%,rgb(0 0 0 / .026) 30%,rgb(0 0 0 / .042) 40%,rgb(0 0 0 / .06) 50%,rgb(0 0 0 / .078) 60%,rgb(0 0 0 / .094) 70%,rgb(0 0 0 / .1075) 80%,rgb(0 0 0 / .117) 90%,rgb(0 0 0 / .12) 100%);opacity:var(--edge-visibility,1);pointer-events:none}
+.summary-edge-blur::after{content:"";position:absolute;inset:0;background:linear-gradient(var(--blur-direction),rgb(0 0 0 / 0) 0%,rgb(0 0 0 / calc(var(--footer-tint-opacity,.12) * .025)) 10%,rgb(0 0 0 / calc(var(--footer-tint-opacity,.12) * .104166667)) 20%,rgb(0 0 0 / calc(var(--footer-tint-opacity,.12) * .216666667)) 30%,rgb(0 0 0 / calc(var(--footer-tint-opacity,.12) * .35)) 40%,rgb(0 0 0 / calc(var(--footer-tint-opacity,.12) * .5)) 50%,rgb(0 0 0 / calc(var(--footer-tint-opacity,.12) * .65)) 60%,rgb(0 0 0 / calc(var(--footer-tint-opacity,.12) * .783333333)) 70%,rgb(0 0 0 / calc(var(--footer-tint-opacity,.12) * .895833333)) 80%,rgb(0 0 0 / calc(var(--footer-tint-opacity,.12) * .975)) 90%,rgb(0 0 0 / calc(var(--footer-tint-opacity,.12) * 1)) 100%);opacity:var(--edge-visibility,1);pointer-events:none}
 .summary-edge-blur[data-edge=top]::after{display:none}
-.summary-edge-blur[data-edge=bottom]::after{top:auto;height:120%}
+.summary-edge-blur[data-edge=bottom]::after{top:auto;height:var(--footer-tint-height,168px)}
 .summary-text{font-size:var(--text-size);line-height:var(--leading);letter-spacing:0;margin:0;color:var(--body-color);text-wrap:pretty;overflow-wrap:break-word;max-width:70ch}
 .word{display:inline-block;white-space:pre}
 .emphasis{color:#fff;font-weight:550;font-variation-settings:"opsz" 18}.glass.no-emphasis .emphasis{color:inherit;font-weight:400;font-variation-settings:"opsz" 14}

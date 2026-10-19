@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createSummarizer } from '../src/extension/transport';
-import { fixtureSource } from '../src/dev/fixtures';
+import { fixtureSource, fixtureResult } from '../src/dev/fixtures';
 
 const request = () => ({ requestId: crypto.randomUUID(), text: fixtureSource });
 describe('extension request transport', () => {
@@ -24,5 +24,27 @@ describe('extension request transport', () => {
     const pending = createSummarizer(send)(input, controller.signal); controller.abort();
     await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
     expect(send).toHaveBeenLastCalledWith({ type: 'cancel', requestId: input.requestId });
+  });
+  it('polls long jobs through separate messages and returns the matching result', async () => {
+    const input = request(), result = fixtureResult(input);
+    const send = vi.fn().mockResolvedValueOnce({ pending: true, requestId: input.requestId })
+      .mockResolvedValueOnce({ pending: true, requestId: input.requestId }).mockResolvedValueOnce({ ok: true, result });
+    expect(await createSummarizer(send, 1000, 1)(input, new AbortController().signal)).toEqual(result);
+    expect(send.mock.calls.slice(1).map(call => call[0])).toEqual(Array(2).fill({ type: 'poll', requestId: input.requestId }));
+  });
+  it('cancels polling immediately when the tray closes', async () => {
+    const input = request(), controller = new AbortController();
+    const send = vi.fn(async () => ({ pending: true, requestId: input.requestId }));
+    const pending = createSummarizer(send, 1000, 5)(input, controller.signal);
+    await new Promise(resolve => setTimeout(resolve, 1)); controller.abort();
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+    await new Promise(resolve => setTimeout(resolve, 10));
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send).toHaveBeenLastCalledWith({ type: 'cancel', requestId: input.requestId });
+  });
+  it('rejects a stale job identity before polling', async () => {
+    const send = vi.fn(async () => ({ pending: true, requestId: crypto.randomUUID() }));
+    await expect(createSummarizer(send)(request(), new AbortController().signal)).rejects.toMatchObject({ detail: { code: 'invalid_summary' } });
+    expect(send).toHaveBeenCalledTimes(1);
   });
 });
