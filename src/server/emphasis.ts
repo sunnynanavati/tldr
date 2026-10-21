@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { levelText, restrainEmphasis, wordCount, type ModelSummary, type SummaryLevel } from '../shared/summary';
+import { levelText, restrainEmphasis, wordCount, cueWordCount, type ModelSummary, type SummaryLevel } from '../shared/summary';
 
 // Semantic annotations live on the prose itself: no separately quoted phrases
 // can drift away from the text when complete levels are assembled.
@@ -15,8 +15,8 @@ export const SemanticRunSchema = z.union([
   }).strict(),
   z.object({
     text: CueTextSchema,
-    role: z.enum(['takeaway', 'qualifier', 'supporting'])
-      .describe('takeaway: core action/finding; qualifier: essential uncertainty/negation/condition/cause; supporting: useful additional information.'),
+    role: z.enum(['takeaway', 'qualifier', 'supporting', 'name'])
+      .describe('name: a proper name present in the prose (person, organization, place, or named work), isolated from surrounding words; takeaway: core action/finding; qualifier: essential uncertainty/negation/condition/cause; supporting: useful additional information.'),
   }).strict(),
 ]);
 export type SemanticRun = z.infer<typeof SemanticRunSchema>;
@@ -75,7 +75,7 @@ export class HighlightCoverageError extends Error {}
 // meaning into every expanded level automatically, without re-quoting the text.
 export function highlightSummary(model: AnnotatedSummary): ModelSummary {
   const segmenter = new Intl.Segmenter('en', { granularity: 'word' });
-  const priority = { core: 0, takeaway: 1, qualifier: 2, subject: 3, supporting: 4 } as const;
+  const priority = { core: 0, name: 0.5, takeaway: 1, qualifier: 2, subject: 3, supporting: 4 } as const;
   // Lock both highlighted and muted cues at their first appearance.
   const decisions = new WeakMap<AnnotatedRun, boolean>();
   return { levels: model.levels.map((level, index) => {
@@ -83,6 +83,8 @@ export function highlightSummary(model: AnnotatedSummary): ModelSummary {
     const words = [...segmenter.segment(text)].filter(part => part.isWordLike);
     const starts = new Set(words.map(word => word.index));
     const ends = new Set(words.map(word => word.index + word.segment.length));
+    const seenNames = new Set<string>();
+    const firstNames: Span[] = [];
     const candidates: Span[] = []; let offset = 0;
     for (const run of level.runs) {
       const base = offset; offset += run.text.length;
@@ -90,11 +92,21 @@ export function highlightSummary(model: AnnotatedSummary): ModelSummary {
       if (!(run.role in priority)) throw new Error('Invalid summary annotation.');
       const phrase = run.text.replace(/^[\s.,!?。！？،;:]+|[\s.,!?。！？،;:]+$/gu, '');
       const phraseWords = [...segmenter.segment(phrase)].filter(part => part.isWordLike);
-      if (!phraseWords.length || phraseWords.length > 6) continue;
+      if (!phraseWords.length || cueWordCount(phrase) > 6) continue;
       if (/\b(?:a|an|the|of|to|for|with|and|or|than|whether)$/iu.test(phrase)) continue;
       const start = base + run.text.indexOf(phrase), end = start + phrase.length;
       if (!starts.has(start + phraseWords[0]!.index) || !ends.has(start + phraseWords.at(-1)!.index + phraseWords.at(-1)!.segment.length)) continue;
-      candidates.push({ start, end, priority: priority[run.role], run });
+      const span = { start, end, priority: priority[run.role], run };
+      if (run.role === 'name') {
+        const key = phrase.normalize('NFKC').toLowerCase().replace(/\s+/gu, ' ');
+        const first = !seenNames.has(key);
+        seenNames.add(key);
+        if (first) firstNames.push(span);
+        // An earlier insertion must not mute a name highlighted at a shorter
+        // level. Otherwise repeated mentions need no extra emphasis.
+        if (!first && decisions.get(run) !== true) continue;
+      }
+      candidates.push(span);
     }
     candidates.sort((a, b) => a.priority - b.priority || a.start - b.start);
     const spans = candidates.filter(span => decisions.get(span.run) === true);
@@ -109,6 +121,11 @@ export function highlightSummary(model: AnnotatedSummary): ModelSummary {
         spans.push(span); if (span.priority === 0 || (!coreRequired && span.priority === 1)) hasTakeaway = true;
       }
     }
+    // Ask the provider to rebalance compact cues rather than silently discard
+    // a first name mention when it competes with the presentation safeguards.
+    if (!retainsSpans(renderSpans(text, spans), firstNames)) {
+      throw new HighlightCoverageError('First mentions of names need short, usable highlights alongside the main takeaway.');
+    }
     const addedWords = wordCount(level.runs.filter(run => !decisions.has(run)).map(run => run.text).join(''));
     const addedCues = spans.filter(span => !decisions.has(span.run));
     const addedHighlightedWords = addedCues.reduce((count, span) => count + wordCount(text.slice(span.start, span.end)), 0);
@@ -116,11 +133,11 @@ export function highlightSummary(model: AnnotatedSummary): ModelSummary {
     // Existing decisions stay fixed; the provider must improve the new prose's annotations.
     if (index > 0 && addedWords >= 12
       && (addedCues.length < Math.max(1, Math.floor(addedWords / 25)) || addedHighlightedWords < Math.max(1, Math.floor(addedWords * .12)))) {
-      throw new HighlightCoverageError('New details need complete, short highlights distributed through the added information.');
+      throw new HighlightCoverageError(`New details need complete, short highlights distributed through the added information. Level ${index} introduces ${addedWords} words, but only ${addedCues.length} usable new cues totaling ${addedHighlightedWords} highlighted words. This expansion needs at least ${Math.max(1, Math.floor(addedWords / 25))} distinct new cues and ${Math.max(1, Math.floor(addedWords * .12))} highlighted words. Split plain prose around meaningful 1–3-word cues in these newly introduced sentences; a single long cue cannot stand in for distributed annotations.`);
     }
     for (const run of level.runs) if (!decisions.has(run)) decisions.set(run, spans.some(span => span.run === run));
     const result = renderSpans(text, spans);
-    if (words.length > 1 && !hasTakeaway) throw new Error('The model did not annotate a usable summary highlight.');
+    if (words.length > 1 && !hasTakeaway) throw new HighlightCoverageError('The model did not annotate a usable summary highlight. Mark a short, complete main action or finding in the shared predicate; keep surrounding prose plain.');
     // Only text and boolean emphasis leave the provider boundary.
     if (levelText(result) !== text) throw new Error('Summary text changed while applying highlights.');
     return result;

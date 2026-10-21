@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { wordCount } from '../shared/summary';
-import { SemanticRunSchema, FocusedTextSchema, focusedRuns, joinSemanticParts, type AnnotatedSummary } from './emphasis';
+import { SemanticRunSchema, FocusedTextSchema, focusedRuns, joinSemanticParts, HighlightCoverageError, type AnnotatedRun, type AnnotatedSummary } from './emphasis';
 
 // A required insertion slot inside the lead sentence prevents append-only output.
 // Further parts may insert details in other sentences or add supporting sentences.
@@ -18,6 +18,33 @@ export function compositionSchema(levelCount: number, targets?: number[]) {
   return z.object({ compositions: z.array(composition).max(1) }).strict();
 }
 export type Composition = z.infer<ReturnType<typeof compositionSchema>>;
+
+// Long compositions use only inline runs. A separate required `takeaway`
+// string was sometimes interpreted as a label after an already complete
+// sentence, producing fragments such as ". assessed alternatives.".
+export function articleCompositionSchema() {
+  const runs = z.array(SemanticRunSchema).min(1).max(40);
+  return z.object({ compositions: z.array(z.object({
+    lead: z.object({
+      subject: runs,
+      details: z.array(z.object({ appearsAt: z.number().int().min(1).max(4), runs }).strict()).length(1),
+      predicate: runs.describe('The actual shared sentence predicate, in reading order. Mark its main action/finding with role takeaway. No separate label or repeated cue.'),
+    }).strict(),
+    tail: z.array(z.object({ appearsAt: z.number().int().min(0).max(4), runs }).strict()).max(60),
+  }).strict()).max(1) }).strict();
+}
+export function composeArticleLevels(plan: z.infer<ReturnType<typeof articleCompositionSchema>>): AnnotatedSummary {
+  const composition = plan.compositions[0];
+  if (!composition) return { levels: [] };
+  const { lead, tail } = composition;
+  const core = lead.predicate.findIndex(run => run.role === 'takeaway');
+  if (core < 0) throw new HighlightCoverageError('The shared predicate needs an inline takeaway run containing the main action or finding.');
+  const predicate: AnnotatedRun[] = lead.predicate.map((run, i) => i === core ? { text: run.text, role: 'core' } : run);
+  const parts = [{ appearsAt: 0, runs: lead.subject }, ...lead.details, { appearsAt: 0, runs: predicate }, ...tail];
+  return { levels: Array.from({ length: 5 }, (_, level) => ({
+    runs: joinSemanticParts(parts.filter(part => part.appearsAt <= level).map(part => part.runs)),
+  })) };
+}
 export function composeLevels(plan: Composition, levelCount: number): AnnotatedSummary {
   const composition = plan.compositions[0];
   if (!composition) return { levels: [] };

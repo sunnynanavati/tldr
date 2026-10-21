@@ -4,6 +4,8 @@ import { SummaryRequestSchema, SummaryResponseSchema } from './summary';
 export const BACKEND_URL = 'http://127.0.0.1:4317';
 export const EXTENSION_TIMEOUT_MS = 25_000;
 export const ARTICLE_TIMEOUT_MS = 95_000;
+export const LONG_ARTICLE_DEADLINE_MS = 180_000;
+export const LONG_ARTICLE_TIMEOUT_MS = LONG_ARTICLE_DEADLINE_MS + 5000;
 export const ErrorSchema = z.object({ code: z.string(), message: z.string(), retryable: z.boolean() });
 export type PublicError = z.infer<typeof ErrorSchema>;
 export const ReplySchema = z.discriminatedUnion('ok', [

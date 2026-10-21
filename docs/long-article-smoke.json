@@ -1,0 +1,798 @@
+{
+  "sourceChars": 198285,
+  "sourceWords": 28681,
+  "sections": 12,
+  "seconds": 58.6,
+  "wordCounts": [
+    52,
+    111,
+    218,
+    355,
+    425
+  ],
+  "checks": {
+    "earlyBudget": true,
+    "middleNegativeResult": true,
+    "lateReversal": true,
+    "twoPilots": true
+  },
+  "note": "Synthetic coverage probe; keyword checks require manual review and do not establish factual fidelity on arbitrary articles.",
+  "levels": [
+    {
+      "runs": [
+        {
+          "text": "The ",
+          "emphasis": false
+        },
+        {
+          "text": "River County",
+          "emphasis": true
+        },
+        {
+          "text": " ",
+          "emphasis": false
+        },
+        {
+          "text": "council",
+          "emphasis": true
+        },
+        {
+          "text": " ",
+          "emphasis": false
+        },
+        {
+          "text": "cancelled the county-wide service-renewal rollout",
+          "emphasis": true
+        },
+        {
+          "text": " after safety failures and unresolved costs. It ",
+          "emphasis": false
+        },
+        {
+          "text": "approved only two small repair pilots",
+          "emphasis": true
+        },
+        {
+          "text": ": the North library roof and East footbridge railing. It authorized no expansion of the water-treatment pilot. The proposed $48 million ceiling remains ",
+          "emphasis": false
+        },
+        {
+          "text": "unapproved",
+          "emphasis": true
+        },
+        {
+          "text": ", not a spending commitment.",
+          "emphasis": false
+        }
+      ]
+    },
+    {
+      "runs": [
+        {
+          "text": "The ",
+          "emphasis": false
+        },
+        {
+          "text": "River County",
+          "emphasis": true
+        },
+        {
+          "text": " ",
+          "emphasis": false
+        },
+        {
+          "text": "council",
+          "emphasis": true
+        },
+        {
+          "text": ", after an independent review chaired by ",
+          "emphasis": false
+        },
+        {
+          "text": "Mira Sen",
+          "emphasis": true
+        },
+        {
+          "text": ", ",
+          "emphasis": false
+        },
+        {
+          "text": "cancelled the county-wide service-renewal rollout",
+          "emphasis": true
+        },
+        {
+          "text": " after safety failures and unresolved costs. It ",
+          "emphasis": false
+        },
+        {
+          "text": "approved only two small repair pilots",
+          "emphasis": true
+        },
+        {
+          "text": ": the North library roof and East footbridge railing. It authorized no expansion of the water-treatment pilot. The proposed $48 million ceiling remains ",
+          "emphasis": false
+        },
+        {
+          "text": "unapproved",
+          "emphasis": true
+        },
+        {
+          "text": ", not a spending commitment. ",
+          "emphasis": false
+        },
+        {
+          "text": "Arun Das",
+          "emphasis": true
+        },
+        {
+          "text": " reported that treated water ",
+          "emphasis": false
+        },
+        {
+          "text": "exceeded the contamination threshold",
+          "emphasis": true
+        },
+        {
+          "text": " in the pilot’s safety test; the pilot was not approved for household use. A ",
+          "emphasis": false
+        },
+        {
+          "text": "second test is required",
+          "emphasis": true
+        },
+        {
+          "text": " before any expansion can be considered. Sen said the county must ",
+          "emphasis": false
+        },
+        {
+          "text": "publish independent safety results",
+          "emphasis": true
+        },
+        {
+          "text": " and a revised cost assessment before reconsidering expansion.",
+          "emphasis": false
+        }
+      ]
+    },
+    {
+      "runs": [
+        {
+          "text": "The ",
+          "emphasis": false
+        },
+        {
+          "text": "River County",
+          "emphasis": true
+        },
+        {
+          "text": " ",
+          "emphasis": false
+        },
+        {
+          "text": "council",
+          "emphasis": true
+        },
+        {
+          "text": ", after an independent review chaired by ",
+          "emphasis": false
+        },
+        {
+          "text": "Mira Sen",
+          "emphasis": true
+        },
+        {
+          "text": ", ",
+          "emphasis": false
+        },
+        {
+          "text": "cancelled the county-wide service-renewal rollout",
+          "emphasis": true
+        },
+        {
+          "text": " after safety failures and unresolved costs. It ",
+          "emphasis": false
+        },
+        {
+          "text": "approved only two small repair pilots",
+          "emphasis": true
+        },
+        {
+          "text": ": the North library roof and East footbridge railing. It authorized no expansion of the water-treatment pilot. The proposed $48 million ceiling remains ",
+          "emphasis": false
+        },
+        {
+          "text": "unapproved",
+          "emphasis": true
+        },
+        {
+          "text": ", not a spending commitment. ",
+          "emphasis": false
+        },
+        {
+          "text": "Arun Das",
+          "emphasis": true
+        },
+        {
+          "text": " reported that treated water ",
+          "emphasis": false
+        },
+        {
+          "text": "exceeded the contamination threshold",
+          "emphasis": true
+        },
+        {
+          "text": " in the pilot’s safety test; the pilot was not approved for household use. A ",
+          "emphasis": false
+        },
+        {
+          "text": "second test is required",
+          "emphasis": true
+        },
+        {
+          "text": " before any expansion can be considered. Sen said the county must ",
+          "emphasis": false
+        },
+        {
+          "text": "publish independent safety results",
+          "emphasis": true
+        },
+        {
+          "text": " and a revised cost assessment before reconsidering expansion. The initial proposal had envisaged replacing ageing assets across the county, but the committee ",
+          "emphasis": false
+        },
+        {
+          "text": "compared repair, replacement and monitoring",
+          "emphasis": true
+        },
+        {
+          "text": " rather than treating every project as necessary. The water-treatment pilot ",
+          "emphasis": false
+        },
+        {
+          "text": "did not demonstrate safe drinking water",
+          "emphasis": true
+        },
+        {
+          "text": ". Its failed test was ",
+          "emphasis": false
+        },
+        {
+          "text": "independent of equipment delivery",
+          "emphasis": true
+        },
+        {
+          "text": " schedules. The two approved repairs ",
+          "emphasis": false
+        },
+        {
+          "text": "do not establish wider safety",
+          "emphasis": true
+        },
+        {
+          "text": ", effectiveness or affordability; the final decision ",
+          "emphasis": false
+        },
+        {
+          "text": "supersedes earlier rollout options",
+          "emphasis": true
+        },
+        {
+          "text": ". Across the supporting inspection records, teams documented conditions and access restrictions at sites covering libraries, footbridges, bus shelters, drainage, school kitchens, archive storage, clinics, lighting, recycling facilities, walking routes, water infrastructure and community gardens. These were ",
+          "emphasis": false
+        },
+        {
+          "text": "planning observations, not purchases",
+          "emphasis": true
+        },
+        {
+          "text": " or installed replacements.",
+          "emphasis": false
+        }
+      ]
+    },
+    {
+      "runs": [
+        {
+          "text": "The ",
+          "emphasis": false
+        },
+        {
+          "text": "River County",
+          "emphasis": true
+        },
+        {
+          "text": " ",
+          "emphasis": false
+        },
+        {
+          "text": "council",
+          "emphasis": true
+        },
+        {
+          "text": ", after an independent review chaired by ",
+          "emphasis": false
+        },
+        {
+          "text": "Mira Sen",
+          "emphasis": true
+        },
+        {
+          "text": ", ",
+          "emphasis": false
+        },
+        {
+          "text": "cancelled the county-wide service-renewal rollout",
+          "emphasis": true
+        },
+        {
+          "text": " after safety failures and unresolved costs. It ",
+          "emphasis": false
+        },
+        {
+          "text": "approved only two small repair pilots",
+          "emphasis": true
+        },
+        {
+          "text": ": the North library roof and East footbridge railing. It authorized no expansion of the water-treatment pilot. The proposed $48 million ceiling remains ",
+          "emphasis": false
+        },
+        {
+          "text": "unapproved",
+          "emphasis": true
+        },
+        {
+          "text": ", not a spending commitment. ",
+          "emphasis": false
+        },
+        {
+          "text": "Arun Das",
+          "emphasis": true
+        },
+        {
+          "text": " reported that treated water ",
+          "emphasis": false
+        },
+        {
+          "text": "exceeded the contamination threshold",
+          "emphasis": true
+        },
+        {
+          "text": " in the pilot’s safety test; the pilot was not approved for household use. A ",
+          "emphasis": false
+        },
+        {
+          "text": "second test is required",
+          "emphasis": true
+        },
+        {
+          "text": " before any expansion can be considered. Sen said the county must ",
+          "emphasis": false
+        },
+        {
+          "text": "publish independent safety results",
+          "emphasis": true
+        },
+        {
+          "text": " and a revised cost assessment before reconsidering expansion. The initial proposal had envisaged replacing ageing assets across the county, but the committee ",
+          "emphasis": false
+        },
+        {
+          "text": "compared repair, replacement and monitoring",
+          "emphasis": true
+        },
+        {
+          "text": " rather than treating every project as necessary. The water-treatment pilot ",
+          "emphasis": false
+        },
+        {
+          "text": "did not demonstrate safe drinking water",
+          "emphasis": true
+        },
+        {
+          "text": ". Its failed test was ",
+          "emphasis": false
+        },
+        {
+          "text": "independent of equipment delivery",
+          "emphasis": true
+        },
+        {
+          "text": " schedules. The two approved repairs ",
+          "emphasis": false
+        },
+        {
+          "text": "do not establish wider safety",
+          "emphasis": true
+        },
+        {
+          "text": ", effectiveness or affordability; the final decision ",
+          "emphasis": false
+        },
+        {
+          "text": "supersedes earlier rollout options",
+          "emphasis": true
+        },
+        {
+          "text": ". Across the supporting inspection records, teams documented conditions and access restrictions at sites covering libraries, footbridges, bus shelters, drainage, school kitchens, archive storage, clinics, lighting, recycling facilities, walking routes, water infrastructure and community gardens. These were ",
+          "emphasis": false
+        },
+        {
+          "text": "planning observations, not purchases",
+          "emphasis": true
+        },
+        {
+          "text": " or installed replacements. Teams asked staff to identify ",
+          "emphasis": false
+        },
+        {
+          "text": "less disruptive repair periods",
+          "emphasis": true
+        },
+        {
+          "text": " and proposed ",
+          "emphasis": false
+        },
+        {
+          "text": "retaining existing services",
+          "emphasis": true
+        },
+        {
+          "text": " where temporary arrangements were feasible. Residents facing restricted access would receive ",
+          "emphasis": false
+        },
+        {
+          "text": "advance notice",
+          "emphasis": true
+        },
+        {
+          "text": " and a contact for alternatives. Inspectors recorded the condition of fittings, ",
+          "emphasis": false
+        },
+        {
+          "text": "replacement-part availability",
+          "emphasis": true
+        },
+        {
+          "text": " and the time needed for a supervised test. A contractor’s estimated delivery window was ",
+          "emphasis": false
+        },
+        {
+          "text": "not a reopening date",
+          "emphasis": true
+        },
+        {
+          "text": ": a specialist must ",
+          "emphasis": false
+        },
+        {
+          "text": "sign the inspection record",
+          "emphasis": true
+        },
+        {
+          "text": " before a facility can safely reopen, and a ",
+          "emphasis": false
+        },
+        {
+          "text": "paid invoice cannot replace sign-off",
+          "emphasis": true
+        },
+        {
+          "text": ". Some lower initial supplier prices ",
+          "emphasis": false
+        },
+        {
+          "text": "excluded routine maintenance",
+          "emphasis": true
+        },
+        {
+          "text": ". The committee therefore requested ",
+          "emphasis": false
+        },
+        {
+          "text": "comparable estimates",
+          "emphasis": true
+        },
+        {
+          "text": " covering the same period instead of endorsing the cheapest initial quote without examining its exclusions. The next review should ",
+          "emphasis": false
+        },
+        {
+          "text": "separate completed repairs from scheduled work",
+          "emphasis": true
+        },
+        {
+          "text": ". Photographs document defects but ",
+          "emphasis": false
+        },
+        {
+          "text": "cannot alone establish causes",
+          "emphasis": true
+        },
+        {
+          "text": "; teams requested an ",
+          "emphasis": false
+        },
+        {
+          "text": "independent assessment",
+          "emphasis": true
+        },
+        {
+          "text": " when a cause remained uncertain.",
+          "emphasis": false
+        }
+      ]
+    },
+    {
+      "runs": [
+        {
+          "text": "The ",
+          "emphasis": false
+        },
+        {
+          "text": "River County",
+          "emphasis": true
+        },
+        {
+          "text": " ",
+          "emphasis": false
+        },
+        {
+          "text": "council",
+          "emphasis": true
+        },
+        {
+          "text": ", after an independent review chaired by ",
+          "emphasis": false
+        },
+        {
+          "text": "Mira Sen",
+          "emphasis": true
+        },
+        {
+          "text": ", ",
+          "emphasis": false
+        },
+        {
+          "text": "cancelled the county-wide service-renewal rollout",
+          "emphasis": true
+        },
+        {
+          "text": " after safety failures and unresolved costs. It ",
+          "emphasis": false
+        },
+        {
+          "text": "approved only two small repair pilots",
+          "emphasis": true
+        },
+        {
+          "text": ": the North library roof and East footbridge railing. It authorized no expansion of the water-treatment pilot. The proposed $48 million ceiling remains ",
+          "emphasis": false
+        },
+        {
+          "text": "unapproved",
+          "emphasis": true
+        },
+        {
+          "text": ", not a spending commitment. ",
+          "emphasis": false
+        },
+        {
+          "text": "Arun Das",
+          "emphasis": true
+        },
+        {
+          "text": " reported that treated water ",
+          "emphasis": false
+        },
+        {
+          "text": "exceeded the contamination threshold",
+          "emphasis": true
+        },
+        {
+          "text": " in the pilot’s safety test; the pilot was not approved for household use. A ",
+          "emphasis": false
+        },
+        {
+          "text": "second test is required",
+          "emphasis": true
+        },
+        {
+          "text": " before any expansion can be considered. Sen said the county must ",
+          "emphasis": false
+        },
+        {
+          "text": "publish independent safety results",
+          "emphasis": true
+        },
+        {
+          "text": " and a revised cost assessment before reconsidering expansion. The initial proposal had envisaged replacing ageing assets across the county, but the committee ",
+          "emphasis": false
+        },
+        {
+          "text": "compared repair, replacement and monitoring",
+          "emphasis": true
+        },
+        {
+          "text": " rather than treating every project as necessary. The water-treatment pilot ",
+          "emphasis": false
+        },
+        {
+          "text": "did not demonstrate safe drinking water",
+          "emphasis": true
+        },
+        {
+          "text": ". Its failed test was ",
+          "emphasis": false
+        },
+        {
+          "text": "independent of equipment delivery",
+          "emphasis": true
+        },
+        {
+          "text": " schedules. The two approved repairs ",
+          "emphasis": false
+        },
+        {
+          "text": "do not establish wider safety",
+          "emphasis": true
+        },
+        {
+          "text": ", effectiveness or affordability; the final decision ",
+          "emphasis": false
+        },
+        {
+          "text": "supersedes earlier rollout options",
+          "emphasis": true
+        },
+        {
+          "text": ". Across the supporting inspection records, teams documented conditions and access restrictions at sites covering libraries, footbridges, bus shelters, drainage, school kitchens, archive storage, clinics, lighting, recycling facilities, walking routes, water infrastructure and community gardens. These were ",
+          "emphasis": false
+        },
+        {
+          "text": "planning observations, not purchases",
+          "emphasis": true
+        },
+        {
+          "text": " or installed replacements. Teams asked staff to identify ",
+          "emphasis": false
+        },
+        {
+          "text": "less disruptive repair periods",
+          "emphasis": true
+        },
+        {
+          "text": " and proposed ",
+          "emphasis": false
+        },
+        {
+          "text": "retaining existing services",
+          "emphasis": true
+        },
+        {
+          "text": " where temporary arrangements were feasible. Residents facing restricted access would receive ",
+          "emphasis": false
+        },
+        {
+          "text": "advance notice",
+          "emphasis": true
+        },
+        {
+          "text": " and a contact for alternatives. Inspectors recorded the condition of fittings, ",
+          "emphasis": false
+        },
+        {
+          "text": "replacement-part availability",
+          "emphasis": true
+        },
+        {
+          "text": " and the time needed for a supervised test. A contractor’s estimated delivery window was ",
+          "emphasis": false
+        },
+        {
+          "text": "not a reopening date",
+          "emphasis": true
+        },
+        {
+          "text": ": a specialist must ",
+          "emphasis": false
+        },
+        {
+          "text": "sign the inspection record",
+          "emphasis": true
+        },
+        {
+          "text": " before a facility can safely reopen, and a ",
+          "emphasis": false
+        },
+        {
+          "text": "paid invoice cannot replace sign-off",
+          "emphasis": true
+        },
+        {
+          "text": ". Some lower initial supplier prices ",
+          "emphasis": false
+        },
+        {
+          "text": "excluded routine maintenance",
+          "emphasis": true
+        },
+        {
+          "text": ". The committee therefore requested ",
+          "emphasis": false
+        },
+        {
+          "text": "comparable estimates",
+          "emphasis": true
+        },
+        {
+          "text": " covering the same period instead of endorsing the cheapest initial quote without examining its exclusions. The next review should ",
+          "emphasis": false
+        },
+        {
+          "text": "separate completed repairs from scheduled work",
+          "emphasis": true
+        },
+        {
+          "text": ". Photographs document defects but ",
+          "emphasis": false
+        },
+        {
+          "text": "cannot alone establish causes",
+          "emphasis": true
+        },
+        {
+          "text": "; teams requested an ",
+          "emphasis": false
+        },
+        {
+          "text": "independent assessment",
+          "emphasis": true
+        },
+        {
+          "text": " when a cause remained uncertain. Resident comments would be considered ",
+          "emphasis": false
+        },
+        {
+          "text": "alongside inspection evidence",
+          "emphasis": true
+        },
+        {
+          "text": ", and any scope change would require ",
+          "emphasis": false
+        },
+        {
+          "text": "updated notice",
+          "emphasis": true
+        },
+        {
+          "text": ". The records remain in the audit trail even if expansion does not proceed; ",
+          "emphasis": false
+        },
+        {
+          "text": "none authorizes spending",
+          "emphasis": true
+        },
+        {
+          "text": " or overrides the council’s final decision. The site comparisons varied by record, ranging from ",
+          "emphasis": false
+        },
+        {
+          "text": "three to eleven sites",
+          "emphasis": true
+        },
+        {
+          "text": ". They described local conditions and possible repair arrangements, ",
+          "emphasis": false
+        },
+        {
+          "text": "not completed repairs",
+          "emphasis": true
+        },
+        {
+          "text": " or a county-wide finding that replacements were needed.",
+          "emphasis": false
+        }
+      ]
+    }
+  ]
+}

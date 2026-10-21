@@ -3,6 +3,7 @@ import { createApp, type ServerConfig } from '../src/server/app';
 import { fixtureSource, fixtureLevels, shortSource, shortLevels } from '../src/dev/fixtures';
 import { serviceError } from '../src/server/errors';
 import type { SummaryProvider } from '../src/server/provider';
+import { MAX_INPUT_CHARS, INPUT_LIMIT_MESSAGE } from '../src/shared/summary';
 
 const extensionId = 'a'.repeat(32), token = 'test-only-local-token-'.repeat(3);
 const headers = { origin: `chrome-extension://${extensionId}`, authorization: `Bearer ${token}` };
@@ -96,7 +97,9 @@ describe('local backend', () => {
     expect((await app.inject({ method: 'GET', url: '/health', headers })).json()).toEqual({ ready: false });
     expect((await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: payload() })).json().error.code).toBe('setup');
     expect((await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: payload('hello') })).json().error.code).toBe('too_short');
-    expect((await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: payload('x'.repeat(40_001)) })).statusCode).toBe(400);
+    const oversized = await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: payload('x'.repeat(MAX_INPUT_CHARS + 1)) });
+    expect(oversized.statusCode).toBe(400);
+    expect(oversized.json().error.message).toBe(INPUT_LIMIT_MESSAGE);
   });
   it('rejects invalid model output without exposing its contents', async () => {
     const app = setup({ summarize: async () => ({ levels: [{ runs: [{ text: 'private provider content', emphasis: false }] }] }) });
@@ -128,4 +131,15 @@ describe('local backend', () => {
     const response = await failed.inject({ method: 'POST', url: '/v1/summaries', headers, payload: payload() });
     expect(response.statusCode).toBe(502); expect(response.body).not.toContain('secret');
   });
+});
+
+it('accepts the full long-article limit through jobs without truncation and rejects synchronous use', async () => {
+  let received = '';
+  const app = setup({ summarize: async request => { received = request.text; return { levels: fixtureLevels }; } });
+  const text = 'Article evidence. '.repeat(Math.ceil(MAX_INPUT_CHARS / 18)).slice(0, MAX_INPUT_CHARS - 1) + '!';
+  const input = payload(text);
+  const sync = await app.inject({ method: 'POST', url: '/v1/summaries', headers, payload: input });
+  expect(sync.json().error.code).toBe('use_job'); expect(received).toBe('');
+  const job = await app.inject({ method: 'POST', url: '/v1/summary-jobs', headers, payload: input });
+  expect(job.statusCode).toBe(202); expect(received).toBe(text);
 });

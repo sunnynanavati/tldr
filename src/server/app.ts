@@ -1,7 +1,7 @@
 import { timingSafeEqual } from 'node:crypto';
 import Fastify from 'fastify';
-import { SummaryRequestSchema, validateSummary, wordCount, MAX_INPUT_CHARS, type SummaryRequest } from '../shared/summary';
-import { type SummaryReply } from '../shared/protocol';
+import { SummaryRequestSchema, validateSummary, wordCount, MAX_INPUT_CHARS, LONG_ARTICLE_CHARS, INPUT_LIMIT_MESSAGE, type SummaryRequest } from '../shared/summary';
+import { LONG_ARTICLE_DEADLINE_MS, type SummaryReply } from '../shared/protocol';
 import { ServiceError, serviceError } from './errors';
 import type { SummaryProvider } from './provider';
 
@@ -10,7 +10,8 @@ export interface ServerConfig {
   deadlineMs?: number; jobLeaseMs?: number; rateLimit?: number; concurrency?: number;
 }
 export function createApp(config: ServerConfig) {
-  const app = Fastify({ logger: false, bodyLimit: MAX_INPUT_CHARS * 4 + 1024 });
+  // JSON can escape one UTF-16 code unit into six bytes (e.g. control characters).
+  const app = Fastify({ logger: false, bodyLimit: MAX_INPUT_CHARS * 6 + 1024 });
   const origin = `chrome-extension://${config.extensionId}`;
   const expectedToken = Buffer.from(`Bearer ${config.token}`);
   const requests = new Map<string, AbortController>();
@@ -44,7 +45,7 @@ export function createApp(config: ServerConfig) {
   app.get('/health', async () => ({ ready: Boolean(config.provider) }));
   function admit(body: unknown): { input: SummaryRequest; controller: AbortController } {
     const parsed = SummaryRequestSchema.safeParse(body);
-    if (!parsed.success) throw serviceError(400, 'selection', 'Select a passage of up to 40,000 characters.', false);
+    if (!parsed.success) throw serviceError(400, 'selection', INPUT_LIMIT_MESSAGE, false);
     const input = parsed.data;
     if (wordCount(input.text) < 4) throw serviceError(422, 'too_short', 'Select a complete sentence or a longer passage.', false);
     if (!config.provider) throw serviceError(503, 'setup', 'Add your OpenAI API key to the local backend, then restart it.', false);
@@ -90,6 +91,10 @@ export function createApp(config: ServerConfig) {
     }
   }
   app.post('/v1/summaries', async (request, reply) => {
+    const parsed = SummaryRequestSchema.safeParse(request.body);
+    if (parsed.success && parsed.data.text.length > LONG_ARTICLE_CHARS) {
+      throw serviceError(400, 'use_job', 'Long articles require a background summary job. Reload the TLDR extension and try again.', false);
+    }
     const { input, controller } = admit(request.body);
     const onClose = () => { if (!reply.raw.writableEnded) controller.abort(); };
     reply.raw.on('close', onClose);
@@ -114,7 +119,7 @@ export function createApp(config: ServerConfig) {
     if (parsed.success && jobs.has(parsed.data.requestId)) throw serviceError(409, 'duplicate', 'This summary is already being prepared.');
     const { input, controller } = admit(request.body);
     const job: Job = { controller, touched: Date.now() }; jobs.set(input.requestId, job);
-    void generate(input, controller, 90_000).then(result => {
+    void generate(input, controller, input.text.length > LONG_ARTICLE_CHARS ? LONG_ARTICLE_DEADLINE_MS : 90_000).then(result => {
       if (jobs.get(input.requestId) === job) job.reply = { ok: true, result };
     }, error => {
       if (jobs.get(input.requestId) === job) job.reply = { ok: false, error: error instanceof ServiceError ? error.detail : { code: 'provider', message: 'The summary could not be prepared. Try again.', retryable: true } };
