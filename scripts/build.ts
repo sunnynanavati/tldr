@@ -28,7 +28,7 @@ await writeFile(resolve(outDir, 'manifest.json'), JSON.stringify(manifest, null,
 await copyFile('src/ui/assets/OFL.txt', resolve(outDir, 'OFL.txt'));
 await copyFile('LICENSE', resolve(outDir, 'LICENSE.txt'));
 await writeFile(resolve(outDir, 'THIRD_PARTY_LICENSES.txt'), [
-  'Bundled code retains its own license; TLDR’s all-rights-reserved notice does not override these terms.',
+  'TLDR is licensed under GPL-3.0-only (see LICENSE.txt). Bundled third-party code retains the notices and licenses below.',
   'Zod\n' + await readFile('node_modules/zod/LICENSE', 'utf8'),
   'Vite (bundled runtime helpers)\n' + await readFile('node_modules/vite/LICENSE.md', 'utf8'),
   'Inter: see OFL.txt included in this distribution.',

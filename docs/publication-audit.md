@@ -2,7 +2,7 @@
 
 ## Decision
 
-Suitable for a **public-code GitHub showcase and an accurately described LinkedIn demo**, after the publication steps below. The owner selected all rights reserved; general end-user installation/use permission remains separate. Not yet a one-click consumer product or a Chrome Web Store launch. This is a source/configuration review with automated checks, not an independent penetration test or a guarantee of security.
+Suitable for a **GPL-3.0-only GitHub developer preview and an accurately described LinkedIn demo**, after the publication steps below. The owner selected GPL-3.0-only: personal use, modification, and redistribution are permitted under that license. Not yet a one-click consumer product or a Chrome Web Store launch. This is a source/configuration review with automated checks, not an independent penetration test or a guarantee of security.
 
 ## Findings and fixes
 
@@ -43,9 +43,9 @@ Suitable for a **public-code GitHub showcase and an accurately described LinkedI
 
 ## Publication steps still requiring attention
 
-1. Rights choice resolved: copyright © 2026 Sunny Nanavati, all rights reserved, recorded in LICENSE. No general software-use or source-reuse permission is granted. GitHub platform rights and third-party licenses remain unaffected; the package includes notices for Inter, Zod, and Vite helpers.
+1. Rights choice resolved: copyright © 2026 Sunny Nanavati, GPL-3.0-only, recorded in LICENSE and package metadata. Use, modification, and redistribution (including commercial distribution) are permitted under the GPL. Distributed derivatives require GPL terms and corresponding source. The package retains third-party notices for Inter, Zod, and Vite helpers.
 2. Merge the reviewed changes into the default branch after CI passes. Make repository visibility public only as an explicit publication action; it was PRIVATE at audit start and had no releases.
-3. Before inviting general users to install a downloadable release, define their usage permission separately. The all-rights-reserved notice permits no general reuse by itself. No secrets or backend installation directory should be uploaded.
+3. Publish corresponding source for the exact downloadable binary version, including build scripts and license notices, alongside the build. GPL grants usage rights without a separate personal-use agreement. No secrets or backend installation directory should be uploaded.
 4. For wider nontechnical adoption, build a guided installer/pairing flow and encrypted OS credential storage. Current users still install Node, edit a local environment file, load an unpacked extension, and pair two sides manually.
 5. A Chrome Web Store release requires its own listing, icons, privacy/disclosure review, developer registration, and submission. Those steps were not performed. GitHub/LinkedIn copy must not imply Store availability.
 6. Enable a private vulnerability-reporting channel when the public repository is launched. Review the drafted LinkedIn copy and use only an approved public/fixture demo.

@@ -10,7 +10,9 @@ Developer preview: TLDR currently needs an unpacked Chrome extension **and a loc
 
 ## Rights and permissions
 
-Copyright © 2026 Sunny Nanavati. **All rights reserved.** This is public code for inspection, not an open-source release. No general permission to use, modify, or redistribute TLDR is granted; see [LICENSE](LICENSE). GitHub platform rights and third-party licenses remain unaffected. The setup instructions below are for the owner and separately authorized users. A general end-user usage permission has not yet been granted.
+Copyright © 2026 Sunny Nanavati. TLDR is licensed under **GNU GPL version 3 only (GPL-3.0-only)**; see [LICENSE](LICENSE). You can use it with your own API key, fork it, add features, and redistribute it, including commercially. When distributing modified versions, preserve the required notices and provide corresponding source under GPL-3.0. Private modifications do not need to be published. The software comes without warranty.
+
+Third-party dependencies and assets retain their own licenses. Extension builds include `LICENSE.txt`, `THIRD_PARTY_LICENSES.txt`, and Inter’s `OFL.txt`. Contributions are welcome under the same GPL-3.0-only license; run `npm run verify` and keep credentials and private content out of pull requests.
 
 ## Fresh setup
 
@@ -115,4 +117,4 @@ The extension cannot start a local OS process on its own. Previously, a backend 
 
 Run `npm run verify`, `npm audit`, and `npm run package:extension` before sharing a build. Packaging regenerates the extension and ZIP together and scans the current source, Git history, and build files for key patterns and exact current `.env` secrets. The scanner reports locations only; it never prints credentials. The ZIP contains the extension only, so recipients still need the backend setup above. Packaging requires the `zip` command (included on macOS).
 
-Review [the publication audit](docs/publication-audit.md) before publishing. Do not distribute `.env`, `.runtime`, the installed backend directory, or a ZIP of the whole checkout. The application is all rights reserved; do not advertise it as open source or freely reusable.
+Review [the publication audit](docs/publication-audit.md) before publishing. Do not distribute `.env`, `.runtime`, the installed backend directory, or a ZIP of the whole checkout. For binary releases, provide the corresponding source for that exact build alongside the download, including build scripts and license notices. A source archive from the release tag is a practical way to do this.
