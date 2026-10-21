@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 const directory = resolve('dist/extension');
 const output = resolve('dist/tldr-chrome.zip');
 const temporary = resolve('dist/tldr-chrome.next.zip');
-const files = ['manifest.json', 'content.js', 'worker.js', 'options.html', 'OFL.txt'];
+const files = ['manifest.json', 'content.js', 'worker.js', 'options.html', 'OFL.txt', 'LICENSE.txt', 'THIRD_PARTY_LICENSES.txt'];
 for (const name of await readdir(resolve(directory, 'assets'))) {
   if (!/^options-[\w-]+\.(?:js|css)$/u.test(name)) throw new Error('Unexpected extension asset; review before packaging.');
   files.push(`assets/${name}`);

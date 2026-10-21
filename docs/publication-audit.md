@@ -2,7 +2,7 @@
 
 ## Decision
 
-Suitable for a **developer-preview GitHub release and an accurately described LinkedIn demo**, after the publication steps below. Not yet a one-click consumer product or a Chrome Web Store launch. This is a source/configuration review with automated checks, not an independent penetration test or a guarantee of security.
+Suitable for a **public-code GitHub showcase and an accurately described LinkedIn demo**, after the publication steps below. The owner selected all rights reserved; general end-user installation/use permission remains separate. Not yet a one-click consumer product or a Chrome Web Store launch. This is a source/configuration review with automated checks, not an independent penetration test or a guarantee of security.
 
 ## Findings and fixes
 
@@ -19,7 +19,7 @@ Suitable for a **developer-preview GitHub release and an accurately described Li
 ## Credential exposure review
 
 - Scanned 122 initial tracked/unignored working files and 253 Git-history blobs across local refs, fetched remotes, and reflogs. No exact current OpenAI key/local token or recognized OpenAI/GitHub/private-key pattern was found.
-- Scanned current build files and uncompressed entries of the old ZIP. No credential findings. The replacement ZIP contains only seven extension files and matches the built directory byte for byte.
+- Scanned current build files and uncompressed entries of the old ZIP. No credential findings. The replacement ZIP contains only extension files and license notices and matches the built directory byte for byte.
 - OCR-scanned 39 current tracked screenshots and 37 historical image blobs; no key-shaped text was detected. OCR can miss small, obscured, or unusual strings; these checks do not prove that all screenshots are free of personal information.
 - `.env`, `.env.*` (except the empty example), `.runtime`, node_modules, and dist are Git-ignored. Neither actual `.env` is tracked. The installed backend environment is outside the repository and is not packaged.
 - The API key is only used by the Node provider. The worker sends a separate local bearer token to the fixed loopback endpoint, and restricts storage to trusted extension contexts. No key is rendered in a content script or sent to the host webpage.
@@ -43,9 +43,9 @@ Suitable for a **developer-preview GitHub release and an accurately described Li
 
 ## Publication steps still requiring attention
 
-1. Choose an application license. The Inter font's OFL is included, but it does not license the application code. Do not claim the project is open source until an application license is chosen.
+1. Rights choice resolved: copyright © 2026 Sunny Nanavati, all rights reserved, recorded in LICENSE. No general software-use or source-reuse permission is granted. GitHub platform rights and third-party licenses remain unaffected; the package includes notices for Inter, Zod, and Vite helpers.
 2. Merge the reviewed changes into the default branch after CI passes. Make repository visibility public only as an explicit publication action; it was PRIVATE at audit start and had no releases.
-3. Publish a tagged developer-preview release with the freshly generated extension ZIP and link to backend instructions. No secrets or backend installation directory should be uploaded.
+3. Before inviting general users to install a downloadable release, define their usage permission separately. The all-rights-reserved notice permits no general reuse by itself. No secrets or backend installation directory should be uploaded.
 4. For wider nontechnical adoption, build a guided installer/pairing flow and encrypted OS credential storage. Current users still install Node, edit a local environment file, load an unpacked extension, and pair two sides manually.
 5. A Chrome Web Store release requires its own listing, icons, privacy/disclosure review, developer registration, and submission. Those steps were not performed. GitHub/LinkedIn copy must not imply Store availability.
 6. Enable a private vulnerability-reporting channel when the public repository is launched. Review the drafted LinkedIn copy and use only an approved public/fixture demo.

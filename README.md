@@ -8,6 +8,10 @@ A Chrome extension that summarizes selected text in the approved floating glass 
 
 Developer preview: TLDR currently needs an unpacked Chrome extension **and a local Node 24 backend**. It is not a one-click Chrome Web Store release. Each user supplies their own OpenAI API key and pays their own API usage; the project ships no credentials or hosted summary service. The persistent background helper currently supports macOS; other platforms need a manually managed backend.
 
+## Rights and permissions
+
+Copyright © 2026 Sunny Nanavati. **All rights reserved.** This is public code for inspection, not an open-source release. No general permission to use, modify, or redistribute TLDR is granted; see [LICENSE](LICENSE). GitHub platform rights and third-party licenses remain unaffected. The setup instructions below are for the owner and separately authorized users. A general end-user usage permission has not yet been granted.
+
 ## Fresh setup
 
 1. Install/use Node 24 LTS (`.nvmrc` specifies 24), then run `npm ci` and `npm run build`.
@@ -111,4 +115,4 @@ The extension cannot start a local OS process on its own. Previously, a backend 
 
 Run `npm run verify`, `npm audit`, and `npm run package:extension` before sharing a build. Packaging regenerates the extension and ZIP together and scans the current source, Git history, and build files for key patterns and exact current `.env` secrets. The scanner reports locations only; it never prints credentials. The ZIP contains the extension only, so recipients still need the backend setup above. Packaging requires the `zip` command (included on macOS).
 
-Review [the publication audit](docs/publication-audit.md) before publishing. Do not distribute `.env`, `.runtime`, the installed backend directory, or a ZIP of the whole checkout. The application does not yet declare an open-source license; choose one before advertising it as open source.
+Review [the publication audit](docs/publication-audit.md) before publishing. Do not distribute `.env`, `.runtime`, the installed backend directory, or a ZIP of the whole checkout. The application is all rights reserved; do not advertise it as open source or freely reusable.

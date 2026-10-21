@@ -1,0 +1,13 @@
+Copyright (c) 2026 Sunny Nanavati. All rights reserved.
+
+No license is granted to use, copy, modify, distribute, sublicense, or sell
+TLDR or its source code, except as required by applicable law, permitted by
+the applicable GitHub platform terms, or separately authorized in writing
+by the copyright holder. Public availability of the source code does not
+grant an open-source license or a general permission to reuse the software.
+
+Third-party dependencies and assets remain subject to their respective
+licenses. This notice does not restrict rights granted by those licenses.
+The bundled Inter font is covered by the SIL Open Font License in
+src/ui/assets/OFL.txt. Extension distributions also include third-party
+license notices for bundled code.
