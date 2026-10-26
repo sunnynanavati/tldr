@@ -4,6 +4,10 @@
 
 Suitable for a **GPL-3.0-only GitHub developer preview and an accurately described LinkedIn demo**, after the publication steps below. The owner selected GPL-3.0-only: personal use, modification, and redistribution are permitted under that license. Not yet a one-click consumer product or a Chrome Web Store launch. This is a source/configuration review with automated checks, not an independent penetration test or a guarantee of security.
 
+## October 26 publication recheck
+
+The owner authorized merging PR #1 and publishing the repository. A fresh npm audit found newly reported moderate fast-uri advisories. Updated all locked copies from 3.1.8 / 4.2.2 to 3.1.9 / 4.2.3; npm audit then reported zero vulnerabilities. Re-run verification and secret scanning on this release before merging. The October 21 findings below remain a dated assessment.
+
 ## Findings and fixes
 
 | Severity | Finding | Disposition |

@@ -29,7 +29,7 @@ https://github.com/sunnynanavati/tldr
 ## Before posting
 
 1. The GPL-3.0-only choice is recorded in LICENSE. Review the audit, commit the verified changes, and push them. Confirm the default branch contains them and CI is green.
-2. Decide explicitly to make the repository public. Check its public view in a signed-out browser; the link currently points to a private repository.
+2. Decide explicitly to make the repository public. Check its public view in a signed-out browser; confirm the link is accessible without signing in.
 3. For a downloadable build, provide corresponding source for that exact version alongside it (for example, the tagged source archive with build scripts). The ZIP includes LICENSE.txt and third-party notices. Never attach `.env`, `.runtime`, or installed service files.
 4. Include a short screen recording using an authored fixture or public article. Hide account pages, personal tabs, key settings, clipboard history, and notifications. Demonstrate selection → tray → slider → move/resize.
 5. Link the README, data-handling notes, setup requirements, and cost caveat from the release. Verify a clean-machine installation before describing setup as easy.

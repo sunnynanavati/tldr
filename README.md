@@ -16,6 +16,8 @@ Third-party dependencies and assets retain their own licenses. Extension builds 
 
 ## Fresh setup
 
+Clone this repository (`git clone https://github.com/sunnynanavati/tldr.git && cd tldr`) or download and extract its source ZIP, then open a terminal in that folder.
+
 1. Install/use Node 24 LTS (`.nvmrc` specifies 24), then run `npm ci` and `npm run build`.
 2. Open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select `dist/extension`.
 3. Create `.env` from `.env.example` (on macOS/Linux: `cp .env.example .env && chmod 600 .env`). Add `OPENAI_API_KEY`, generate a local token with `npm run token`, and set `TLDR_EXTENSION_ID` to the ID Chrome shows. Keep `.env` private and untracked.
