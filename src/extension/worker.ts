@@ -1,5 +1,6 @@
 import { BACKEND_URL, ErrorSchema, JobReplySchema, WorkerMessageSchema, type JobReply } from '../shared/protocol';
-import { lengthTargets, wordCount, SummaryRequestSchema, SummaryResponseSchema, type SummaryRequest } from '../shared/summary';
+import { localTokenIssue } from '../shared/connection';
+import { lengthTargets, wordCount, LONG_ARTICLE_CHARS, INPUT_LIMIT_MESSAGE, SummaryRequestSchema, SummaryResponseSchema, type SummaryRequest } from '../shared/summary';
 
 const active = new Map<number, { id: string; controller: AbortController }>();
 const openings = new Map<number, string>();
@@ -24,7 +25,7 @@ async function open(tabId: number, text: string) {
     if (openings.get(tabId) !== openingId) return;
     const request = SummaryRequestSchema.safeParse({ requestId: crypto.randomUUID(), text });
     await chrome.tabs.sendMessage(tabId, request.success ? { type: 'open', request: request.data } : {
-      type: 'selection-error', error: { code: 'selection', message: 'Select a passage of up to 40,000 characters.', retryable: false },
+      type: 'selection-error', error: { code: 'selection', message: INPUT_LIMIT_MESSAGE, retryable: false },
     }, { frameId: 0 });
     await chrome.action.setBadgeText({ tabId, text: '' });
     await chrome.action.setTitle({ tabId, title: 'TLDR · Connection settings' });
@@ -36,7 +37,7 @@ async function open(tabId: number, text: string) {
 }
 async function deleteJob(id: string) {
   const { localToken } = await chrome.storage.local.get('localToken');
-  if (typeof localToken !== 'string') return;
+  if (typeof localToken !== 'string' || localTokenIssue(localToken)) return;
   await fetch(`${BACKEND_URL}/v1/summary-jobs/${id}`, {
     method: 'DELETE', credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(5000),
     headers: { Authorization: `Bearer ${localToken}`, 'X-TLDR-Extension-Id': chrome.runtime.id },
@@ -45,6 +46,7 @@ async function deleteJob(id: string) {
 async function pollJob(tabId: number, id: string): Promise<JobReply> {
   try {
     const { localToken } = await chrome.storage.local.get('localToken');
+    if (typeof localToken !== 'string' || localTokenIssue(localToken)) return { ok: false, error: { code: 'connection', message: 'Connect your local backend in TLDR settings.', retryable: false } };
     const response = await fetch(`${BACKEND_URL}/v1/summary-jobs/${id}`, {
       credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(5000),
       headers: { Authorization: `Bearer ${String(localToken)}`, 'X-TLDR-Extension-Id': chrome.runtime.id },
@@ -63,10 +65,10 @@ async function summarize(tabId: number, request: SummaryRequest): Promise<JobRep
   const timer = setTimeout(() => controller.abort(), 24_000);
   try {
     const { localToken } = await chrome.storage.local.get('localToken');
-    if (typeof localToken !== 'string' || localToken.length < 32) return {
+    if (typeof localToken !== 'string' || localTokenIssue(localToken)) return {
       ok: false, error: { code: 'connection', message: 'Connect your local backend in TLDR settings.', retryable: false },
     };
-    const article = lengthTargets(wordCount(request.text)).at(-1)! > 110;
+    const article = request.text.length > LONG_ARTICLE_CHARS || lengthTargets(wordCount(request.text)).at(-1)! > 110;
     if (article) jobs.set(tabId, request.requestId);
     const response = await fetch(`${BACKEND_URL}/v1/${article ? 'summary-jobs' : 'summaries'}`, {
       method: 'POST', signal: controller.signal, credentials: 'omit', cache: 'no-store',

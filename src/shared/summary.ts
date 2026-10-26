@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
-export const MAX_INPUT_CHARS = 40_000;
+export const MAX_INPUT_CHARS = 200_000;
+export const LONG_ARTICLE_CHARS = 40_000;
+export const INPUT_LIMIT_MESSAGE = `Select a passage of up to ${MAX_INPUT_CHARS.toLocaleString('en-US')} characters.`;
 export const SHORT_PASSAGE_WORDS = 40;
 export const levelNames = ['Essential', 'Concise', 'Balanced', 'Expanded', 'Detailed'] as const;
 export const RunSchema = z.object({ text: z.string().min(1).max(4000), emphasis: z.boolean() }).strict();
@@ -38,6 +40,9 @@ const segmenter = new Intl.Segmenter('en', { granularity: 'word' });
 export function wordCount(text: string): number {
   return [...segmenter.segment(text)].filter(part => part.isWordLike).length;
 }
+// Hyphenated compounds count as one word for a cue's visual phrase limit.
+// Summary counts and the total emphasis budget still use Unicode word counts.
+export const cueWordCount = (text: string): number => wordCount(text.replace(/(?<=\p{L})[-‐‑](?=\p{L})/gu, ''));
 export function wordTokens(text: string): string[] {
   return [...segmenter.segment(text)].map(part => part.segment);
 }
@@ -89,7 +94,7 @@ export function restrainEmphasis(level: SummaryLevel): SummaryLevel {
   let budget = highlightBudget(words), phrases = 0;
   return { runs: merged.map((run, index) => {
     const count = wordCount(run.text);
-    const emphasis = run.emphasis && count > 0 && count <= 6 && count <= budget
+    const emphasis = run.emphasis && count > 0 && cueWordCount(run.text) <= 6 && count <= budget
       && phrases < phraseLimit && !/[.!?。！？]/u.test(run.text.replace(/(?<=\p{N})[.,](?=\p{N})/gu, ''))
       && !wholeSentences.some(sentence => ranges[index]!.start < sentence.index + sentence.segment.length && ranges[index]!.end > sentence.index);
     if (emphasis) { budget -= count; phrases++; }

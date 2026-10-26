@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SummaryRequestSchema, SummaryResponseSchema, levelCounts, lengthTargets, modelSummarySchema, restrainEmphasis, summaryText, validateSummary, wordCount } from '../src/shared/summary';
+import { MAX_INPUT_CHARS, SummaryRequestSchema, SummaryResponseSchema, levelCounts, lengthTargets, modelSummarySchema, restrainEmphasis, summaryText, validateSummary, wordCount } from '../src/shared/summary';
 import { fixtureSource, fixtureLevels, shortSource, shortLevels, chineseSource, chineseLevels } from '../src/dev/fixtures';
 
 describe('summary contract', () => {
@@ -54,7 +54,8 @@ describe('summary contract', () => {
   });
   it('rejects empty or oversized selections and fabricated counts', () => {
     expect(SummaryRequestSchema.safeParse({ requestId: crypto.randomUUID(), text: ' '.repeat(10) }).success).toBe(false);
-    expect(SummaryRequestSchema.safeParse({ requestId: crypto.randomUUID(), text: 'x'.repeat(40_001) }).success).toBe(false);
+    expect(SummaryRequestSchema.safeParse({ requestId: crypto.randomUUID(), text: 'x'.repeat(MAX_INPUT_CHARS) }).success).toBe(true);
+    expect(SummaryRequestSchema.safeParse({ requestId: crypto.randomUUID(), text: 'x'.repeat(MAX_INPUT_CHARS + 1) }).success).toBe(false);
     expect(SummaryResponseSchema.safeParse({ requestId: crypto.randomUUID(), levels: fixtureLevels, wordCounts: [1, 2, 3, 4, 5] }).success).toBe(false);
   });
   it('rejects duplicate-length levels, excess levels, and output longer than the source', () => {

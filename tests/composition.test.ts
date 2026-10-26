@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { composeLevels, compositionSchema } from '../src/server/composition';
+import { composeLevels, compositionSchema, composeArticleLevels, articleCompositionSchema } from '../src/server/composition';
 import type { SemanticRun } from '../src/server/emphasis';
 const summaryText = (levels: { runs: { text: string }[] }[], index: number) => levels[index]!.runs.map(run => run.text).join('');
 const runs = (text: string): SemanticRun[] => [{ text, role: 'plain' }];
@@ -40,4 +40,28 @@ it('preserves annotated source-run identity across expansion levels', () => {
   const main = result.levels[0]!.runs.find(run => run.role === 'core');
   expect(main?.text).toBe(predicate.takeaway);
   expect(result.levels[1]!.runs).toContain(main);
+});
+
+it('assembles long articles from inline annotations without adding a separate cue label', () => {
+  const plan = articleCompositionSchema().parse({ compositions: [{
+    lead: {
+      subject: runs('The library'),
+      details: [{ appearsAt: 1, runs: runs(', serving evening students,') }],
+      predicate: [{ text: ' extends opening hours', role: 'takeaway' }, ...runs(' on weekdays.')],
+    },
+    tail: [{ appearsAt: 2, runs: [...runs(' Extra staffing '), { text: 'increases costs', role: 'supporting' }, ...runs('.')] }],
+  }] });
+  const { levels } = composeArticleLevels(plan);
+  expect(summaryText(levels, 0)).toBe('The library extends opening hours on weekdays.');
+  expect(summaryText(levels, 2)).toBe('The library, serving evening students, extends opening hours on weekdays. Extra staffing increases costs.');
+  const core = levels[0]!.runs.find(run => run.role === 'core');
+  expect(levels.every(level => level.runs.includes(core!))).toBe(true);
+  expect(articleCompositionSchema().safeParse({ compositions: [composition] }).success).toBe(false);
+});
+
+it('requires an inline main finding for long articles and permits an empty result', () => {
+  expect(composeArticleLevels({ compositions: [] })).toEqual({ levels: [] });
+  expect(() => composeArticleLevels({ compositions: [{ lead: {
+    subject: runs('The library'), details: [], predicate: runs(' extends opening hours.'),
+  }, tail: [] }] })).toThrow('inline takeaway');
 });

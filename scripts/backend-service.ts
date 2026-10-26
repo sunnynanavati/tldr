@@ -7,6 +7,7 @@ import { parseEnv, promisify } from 'node:util';
 import { execFile } from 'node:child_process';
 import { createConnection } from 'node:net';
 import { SERVICE_LABEL, servicePlist } from './service-config';
+import { localTokenIssue } from '../src/shared/connection';
 
 const exec = promisify(execFile);
 const project = fileURLToPath(new URL('../', import.meta.url));
@@ -36,7 +37,7 @@ async function install() {
   if (Number(process.versions.node.split('.')[0]) !== 24) throw new Error('Use Node 24 to install the TLDR service.');
   const environment = await readFile(resolve(project, '.env'), 'utf8');
   const env = parseEnv(environment);
-  if (!env.OPENAI_API_KEY || (env.TLDR_LOCAL_TOKEN?.length ?? 0) < 32 || !/^[a-p]{32}$/.test(env.TLDR_EXTENSION_ID ?? '')) {
+  if (!env.OPENAI_API_KEY || localTokenIssue(env.TLDR_LOCAL_TOKEN ?? '') || !/^[a-p]{32}$/.test(env.TLDR_EXTENSION_ID ?? '')) {
     throw new Error('Complete OPENAI_API_KEY, TLDR_LOCAL_TOKEN, and TLDR_EXTENSION_ID in the project .env first.');
   }
   // Package dependencies and a Node runtime outside Documents so launchd does not

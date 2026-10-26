@@ -1,5 +1,6 @@
 import './options.css';
 import { BACKEND_URL } from '../shared/protocol';
+import { localTokenIssue } from '../shared/connection';
 const input = document.querySelector<HTMLInputElement>('#token')!;
 const status = document.querySelector<HTMLElement>('#status')!;
 const form = document.querySelector<HTMLFormElement>('#connection-form')!;
@@ -13,7 +14,8 @@ form.addEventListener('submit', event => {
   event.preventDefault(); void testConnection();
 });
 async function testConnection() {
-  const token = input.value.trim(); if (token.length < 32) { status.textContent = 'Use a local token with at least 32 characters.'; return; }
+  const token = input.value.trim(), issue = localTokenIssue(token);
+  if (issue) { status.textContent = issue; input.value = ''; return; }
   button.disabled = true; status.textContent = 'Connecting…';
   await chrome.storage.local.set({ localToken: token });
   try {

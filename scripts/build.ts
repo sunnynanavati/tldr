@@ -1,5 +1,5 @@
 import { build } from 'vite';
-import { mkdir, writeFile, copyFile } from 'node:fs/promises';
+import { mkdir, writeFile, copyFile, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const outDir = resolve('dist/extension');
@@ -26,6 +26,13 @@ const manifest = {
 };
 await writeFile(resolve(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 await copyFile('src/ui/assets/OFL.txt', resolve(outDir, 'OFL.txt'));
+await copyFile('LICENSE', resolve(outDir, 'LICENSE.txt'));
+await writeFile(resolve(outDir, 'THIRD_PARTY_LICENSES.txt'), [
+  'TLDR is licensed under GPL-3.0-only (see LICENSE.txt). Bundled third-party code retains the notices and licenses below.',
+  'Zod\n' + await readFile('node_modules/zod/LICENSE', 'utf8'),
+  'Vite (bundled runtime helpers)\n' + await readFile('node_modules/vite/LICENSE.md', 'utf8'),
+  'Inter: see OFL.txt included in this distribution.',
+].join('\n\n'));
 await build({ configFile: false, publicDir: false, build: {
   outDir: resolve('dist/server'), emptyOutDir: true, target: 'node24', ssr: resolve('src/server/main.ts'), minify: false,
   rollupOptions: { output: { entryFileNames: 'main.js' } },

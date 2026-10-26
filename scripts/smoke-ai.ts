@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import type { AnnotatedSummary } from '../src/server/emphasis';
 import { createOpenAIProvider, DEFAULT_REASONING_EFFORT } from '../src/server/provider';
-import { highlightBudget, levelNames, levelText, validateSummary, wordCount } from '../src/shared/summary';
+import { highlightBudget, levelNames, levelText, validateSummary, wordCount, cueWordCount } from '../src/shared/summary';
 import { summaryCases } from './summary-cases';
 const apiKey = process.env.OPENAI_API_KEY;
 if (!apiKey) {
@@ -24,7 +24,7 @@ if (!apiKey) {
       const phrases = level.runs.filter(run => run.emphasis).map(run => run.text);
       const highlightedWords = wordCount(phrases.join(' ')), totalWords = wordCount(levelText(level));
       if (totalWords > 1 && !phrases.length) throw new Error('Missing summary highlights');
-      if (highlightedWords > highlightBudget(totalWords) || phrases.some(phrase => wordCount(phrase) > 6)) throw new Error('Highlight budget exceeded');
+      if (highlightedWords > highlightBudget(totalWords) || phrases.some(phrase => cueWordCount(phrase) > 6)) throw new Error('Highlight budget exceeded');
       const label = result.levels.length === 1 ? 'Compact' : levelNames[index];
       console.log(`${label}: ${phrases.join(' → ')} (${highlightedWords}/${totalWords} highlighted words)`);
       const rendered = level.runs.map(run => run.emphasis ? `**${run.text}**` : run.text).join('');
